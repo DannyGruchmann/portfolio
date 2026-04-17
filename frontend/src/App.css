@@ -1,0 +1,151 @@
+/* App-level styles (dark premium tech portfolio) */
+
+.App {
+  min-height: 100vh;
+  background: radial-gradient(1200px 800px at 80% -10%, rgba(56, 189, 248, 0.08), transparent 60%),
+              radial-gradient(900px 700px at 10% 20%, rgba(99, 102, 241, 0.07), transparent 55%),
+              #07080c;
+  color: #e6e9ef;
+}
+
+/* Section wrapper spacing */
+.section {
+  padding: clamp(80px, 10vw, 140px) 0;
+  position: relative;
+}
+
+.container-x {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7cc8ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #7cc8ff);
+}
+
+.h-section {
+  font-size: clamp(32px, 4.6vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #f1f5fb;
+}
+
+.sub-section {
+  font-size: clamp(15px, 1.3vw, 17px);
+  color: #a3adbe;
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+/* Button primary */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  color: #06151f;
+  background: linear-gradient(180deg, #9fe3ff 0%, #4dbfff 55%, #1f9cff 100%);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(120, 200, 255, 0.7);
+  box-shadow: 0 8px 30px -10px rgba(64, 170, 255, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  overflow: hidden;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 40px -10px rgba(64, 170, 255, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  filter: brightness(1.04);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 12px;
+  color: #dfe8f5;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+  font-size: 15px;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(120, 200, 255, 0.35);
+}
+
+/* Card */
+.card-premium {
+  position: relative;
+  border-radius: 18px;
+  padding: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  overflow: hidden;
+}
+.card-premium:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124, 200, 255, 0.28);
+}
+.card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px 200px at var(--mx, 50%) var(--my, 0%), rgba(124, 200, 255, 0.12), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.card-premium:hover::before { opacity: 1; }
+
+/* Tag pill */
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.09);
+  color: #b9c6d8;
+  background: rgba(255,255,255,0.025);
+}
+
+/* Marquee line for nav */
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124, 200, 255, 0.5), transparent);
+}
+
+/* Reveal helper (used by framer motion fallback) */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-up.in {
+  opacity: 1;
+  transform: none;
+}
