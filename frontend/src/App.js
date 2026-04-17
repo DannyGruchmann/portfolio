@@ -14,6 +14,7 @@ import ContactCTA from "./components/ContactCTA";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ScrollProgress from "./components/ScrollProgress";
+import ScrollToTop from "./components/ScrollToTop";
 import { Toaster } from "./components/ui/toaster";
 
 const Home = () => {
@@ -33,6 +34,7 @@ const Home = () => {
         <Contact />
       </main>
       <Footer />
+      <ScrollToTop />
       <Toaster />
     </div>
   );

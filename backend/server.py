@@ -5,8 +5,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -65,6 +65,62 @@ async def get_status_checks():
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
+
+# ───────────────────────────────────────────────────────────
+# Contact Inquiries
+# ───────────────────────────────────────────────────────────
+class InquiryCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    email: EmailStr
+    company: Optional[str] = Field(default="", max_length=160)
+    budget: Optional[str] = Field(default="", max_length=40)
+    message: str = Field(..., min_length=2, max_length=4000)
+
+    @field_validator("name", "message")
+    @classmethod
+    def _strip_not_empty(cls, v: str) -> str:
+        v = (v or "").strip()
+        if not v:
+            raise ValueError("must not be empty")
+        return v
+
+
+class Inquiry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: EmailStr
+    company: str = ""
+    budget: str = ""
+    message: str
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+@api_router.post("/inquiries", response_model=Inquiry, status_code=201)
+async def create_inquiry(payload: InquiryCreate):
+    inq = Inquiry(
+        name=payload.name.strip(),
+        email=payload.email,
+        company=(payload.company or "").strip(),
+        budget=(payload.budget or "").strip(),
+        message=payload.message.strip(),
+    )
+    doc = inq.model_dump()
+    doc["createdAt"] = doc["createdAt"].isoformat()
+    await db.inquiries.insert_one(doc)
+    logger.info("New inquiry from %s <%s>", inq.name, inq.email)
+    return inq
+
+
+@api_router.get("/inquiries", response_model=List[Inquiry])
+async def list_inquiries():
+    rows = await db.inquiries.find({}, {"_id": 0}).sort("createdAt", -1).to_list(500)
+    for r in rows:
+        if isinstance(r.get("createdAt"), str):
+            r["createdAt"] = datetime.fromisoformat(r["createdAt"])
+    return rows
 
 # Include the router in the main app
 app.include_router(api_router)

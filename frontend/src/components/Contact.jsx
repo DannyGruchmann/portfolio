@@ -1,9 +1,13 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { Mail, Github, MapPin, Send, Check } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { contactInfo } from "../data/mock";
 import { useToast } from "../hooks/use-toast";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Contact = () => {
   const { t } = useLang();
@@ -17,16 +21,24 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // frontend-only: store locally + show toast
-    await new Promise((r) => setTimeout(r, 700));
-    const queue = JSON.parse(localStorage.getItem("dg_inquiries") || "[]");
-    queue.push({ ...form, createdAt: new Date().toISOString() });
-    localStorage.setItem("dg_inquiries", JSON.stringify(queue));
-    setLoading(false);
-    setSent(true);
-    toast({ title: t.contact.form.sent });
-    setForm({ name: "", email: "", company: "", budget: "", message: "" });
-    setTimeout(() => setSent(false), 3500);
+    try {
+      await axios.post(`${API}/inquiries`, form, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 15000,
+      });
+      setSent(true);
+      toast({ title: t.contact.form.sent });
+      setForm({ name: "", email: "", company: "", budget: "", message: "" });
+      setTimeout(() => setSent(false), 3500);
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      const msg = Array.isArray(detail)
+        ? detail.map((d) => d.msg).join(", ")
+        : detail || err.message || "Error";
+      toast({ title: "Error", description: msg, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

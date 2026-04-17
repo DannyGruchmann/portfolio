@@ -101,3 +101,98 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the Danny Gruchmann portfolio backend inquiries API"
+
+backend:
+  - task: "Root endpoint sanity check"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/ returns correct {'message': 'Hello World'} response with 200 status"
+
+  - task: "Create inquiry with valid data"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/inquiries with valid payload returns 201, correct UUID id, ISO-8601 createdAt, and all submitted fields preserved"
+
+  - task: "Inquiry validation errors"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All validation scenarios working: missing name (422), invalid email (422), empty message (422), whitespace-only message (422), missing all required fields (422)"
+
+  - task: "Create inquiry with minimal fields"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/inquiries with only required fields (name, email, message) returns 201 with empty strings for optional company/budget fields"
+
+  - task: "List inquiries endpoint"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/inquiries returns 200 with JSON array, all required fields present, sorted by createdAt desc (newest first)"
+
+  - task: "MongoDB persistence"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All created inquiries persist correctly in MongoDB and appear in subsequent GET requests"
+
+frontend:
+  # No frontend testing performed as per instructions
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "All backend inquiries API endpoints tested successfully"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "Completed comprehensive testing of Danny Gruchmann portfolio backend inquiries API. All 6 test scenarios passed: root endpoint, valid inquiry creation, validation errors, minimal fields, list inquiries, and MongoDB persistence. Backend is fully functional and ready for production."
