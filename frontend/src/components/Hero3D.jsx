@@ -29,7 +29,17 @@ const Hero3D = () => {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 50% 50%, rgba(34,211,238,0.08) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse at 50% 50%, rgba(34,211,238,0.12) 0%, rgba(14,165,233,0.06) 40%, transparent 70%)",
+          }}
+        />
+        
+        {/* Vertical light ray */}
+        <div
+          className="absolute left-1/2 top-0 bottom-0 w-px pointer-events-none"
+          style={{
+            background: "linear-gradient(180deg, transparent, rgba(34,211,238,0.3) 30%, rgba(34,211,238,0.3) 70%, transparent)",
+            boxShadow: "0 0 40px rgba(34,211,238,0.5)",
+            transform: "translateX(-50%)",
           }}
         />
       </motion.div>
@@ -40,15 +50,15 @@ const Hero3D = () => {
 // ============ DNA Helix Component ============
 const DNAHelix = () => {
   // Generate helix points (double strand)
-  const numPoints = 24;
+  const numPoints = 30;
   const points1 = [];
   const points2 = [];
   const connections = [];
 
   for (let i = 0; i < numPoints; i++) {
     const angle = (i / numPoints) * Math.PI * 4; // 2 full rotations
-    const y = (i / numPoints) * 600 - 100; // Vertical distribution
-    const radius = 140;
+    const y = (i / numPoints) * 700 - 150; // Vertical distribution
+    const radius = 160;
 
     // First strand
     const x1 = Math.cos(angle) * radius;
@@ -144,32 +154,72 @@ const HelixNode = ({ point, delay, strand }) => {
         transformStyle: "preserve-3d",
       }}
     >
-      {/* Glowing sphere */}
-      <div
+      {/* Glowing sphere with pulse */}
+      <motion.div
         className="absolute"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.8, 1, 0.8],
+        }}
+        transition={{
+          duration: 2,
+          delay: delay,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
         style={{
-          width: "8px",
-          height: "8px",
+          width: "12px",
+          height: "12px",
           borderRadius: "50%",
           backgroundColor: color,
-          boxShadow: `0 0 20px ${color}, 0 0 40px ${color}`,
+          boxShadow: `0 0 30px ${color}, 0 0 60px ${color}, 0 0 90px ${color}`,
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+      
+      {/* Outer ring */}
+      <motion.div
+        className="absolute"
+        animate={{
+          scale: [1, 1.8, 1],
+          opacity: [0.6, 0, 0.6],
+        }}
+        transition={{
+          duration: 2,
+          delay: delay,
+          repeat: Infinity,
+          ease: "easeOut",
+        }}
+        style={{
+          width: "20px",
+          height: "20px",
+          borderRadius: "50%",
+          border: `1px solid ${color}`,
           transform: "translate(-50%, -50%)",
         }}
       />
 
       {/* Code snippet label */}
-      <div
-        className="mono text-[9px] absolute whitespace-nowrap"
+      <motion.div
+        className="mono text-[10px] absolute whitespace-nowrap"
+        animate={{
+          opacity: [0.7, 1, 0.7],
+        }}
+        transition={{
+          duration: 3,
+          delay: delay * 0.5,
+          repeat: Infinity,
+        }}
         style={{
           color,
-          transform: "translate(-50%, 12px) rotateY(0deg)",
-          textShadow: `0 0 10px ${color}`,
-          fontWeight: "600",
-          letterSpacing: "0.05em",
+          transform: "translate(-50%, 16px) rotateY(0deg)",
+          textShadow: `0 0 15px ${color}, 0 0 30px ${color}`,
+          fontWeight: "700",
+          letterSpacing: "0.08em",
         }}
       >
         {snippet}
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
@@ -188,19 +238,25 @@ const BasePairConnection = ({ p1, p2, delay }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scaleX: 0 }}
-      animate={{ opacity: 0.4, scaleX: 1 }}
-      transition={{ duration: 0.8, delay }}
+      animate={{ 
+        opacity: [0.5, 0.8, 0.5],
+        scaleX: 1,
+      }}
+      transition={{ 
+        opacity: { duration: 2, repeat: Infinity, delay },
+        scaleX: { duration: 0.8, delay }
+      }}
       style={{
         position: "absolute",
         left: "50%",
         top: "50%",
         width: `${length}px`,
-        height: "1px",
-        background: "linear-gradient(90deg, rgba(34,211,238,0.6), rgba(124,200,255,0.6), rgba(34,211,238,0.6))",
+        height: "2px",
+        background: "linear-gradient(90deg, rgba(34,211,238,0.8), rgba(124,200,255,0.9), rgba(34,211,238,0.8))",
         transform: `translate3d(${x1}px, ${y1}px, ${(p1.z + p2.z) / 2}px) rotate(${angle}deg)`,
         transformOrigin: "0 0",
         transformStyle: "preserve-3d",
-        boxShadow: "0 0 10px rgba(34,211,238,0.5)",
+        boxShadow: "0 0 20px rgba(34,211,238,0.8), 0 0 40px rgba(34,211,238,0.5)",
       }}
     />
   );
@@ -208,9 +264,9 @@ const BasePairConnection = ({ p1, p2, delay }) => {
 
 // ============ Data Flow Particles ============
 const DataParticles = ({ points, delay = 0 }) => {
-  const particles = [0, 1, 2].map((i) => ({
+  const particles = [0, 1, 2, 3, 4].map((i) => ({
     id: i,
-    offset: (i / 3) * points.length,
+    offset: (i / 5) * points.length,
   }));
 
   return (
