@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useLang } from "../contexts/LanguageContext";
 
-// Premium animated process timeline with ONE continuous flowing line
+// Simple VERTICAL timeline with thin line
 const Process = () => {
   const { t } = useLang();
   const containerRef = useRef(null);
@@ -21,132 +21,103 @@ const Process = () => {
           <p className="sub-section">{t.process.sub}</p>
         </div>
 
-        {/* Animated Timeline */}
-        <div className="relative max-w-5xl mx-auto">
-          <ProcessTimeline steps={t.process.steps} scrollProgress={scrollYProgress} />
+        {/* Vertical Timeline */}
+        <div className="relative max-w-4xl mx-auto">
+          <VerticalTimeline steps={t.process.steps} scrollProgress={scrollYProgress} />
         </div>
       </div>
     </section>
   );
 };
 
-// ============ Process Timeline with ONE Continuous Line ============
-const ProcessTimeline = ({ steps, scrollProgress }) => {
+// ============ Vertical Timeline ============
+const VerticalTimeline = ({ steps, scrollProgress }) => {
+  const lineProgress = useTransform(scrollProgress, [0, 1], [0, 1]);
+
   return (
-    <div className="relative py-10">
-      {/* ONE continuous flowing line behind all nodes */}
-      <ContinuousFlowingLine scrollProgress={scrollProgress} />
-
-      {/* Row 1: Steps 1 & 2 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mb-32 relative">
-        <ProcessStep step={steps[0]} index={0} scrollProgress={scrollProgress} threshold={0} />
-        <ProcessStep step={steps[1]} index={1} scrollProgress={scrollProgress} threshold={0.15} />
+    <div className="relative">
+      {/* Thin vertical line */}
+      <div className="absolute left-8 top-0 bottom-0 w-[1.5px] bg-[#1a2a3e] hidden md:block">
+        <motion.div
+          className="absolute top-0 left-0 w-full bg-gradient-to-b from-cyan-400 to-cyan-500"
+          style={{
+            scaleY: lineProgress,
+            transformOrigin: "top",
+          }}
+        />
       </div>
 
-      {/* Row 2: Steps 3 & 4 - CORRECTED ORDER: 3 on RIGHT, 4 on LEFT */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mb-32 relative">
-        <ProcessStep step={steps[3]} index={3} scrollProgress={scrollProgress} threshold={0.5} order="md:order-1" />
-        <ProcessStep step={steps[2]} index={2} scrollProgress={scrollProgress} threshold={0.35} order="md:order-2" />
-      </div>
-
-      {/* Row 3: Steps 5 & 6 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 relative">
-        <ProcessStep step={steps[4]} index={4} scrollProgress={scrollProgress} threshold={0.7} />
-        <ProcessStep step={steps[5]} index={5} scrollProgress={scrollProgress} threshold={0.85} />
+      {/* Steps */}
+      <div className="space-y-16">
+        {steps.map((step, i) => (
+          <ProcessStep
+            key={step.n}
+            step={step}
+            index={i}
+            scrollProgress={scrollProgress}
+            threshold={i * 0.15}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-// ============ ONE Continuous Flowing Line ============
-const ContinuousFlowingLine = ({ scrollProgress }) => {
-  const pathLength = useTransform(scrollProgress, [0, 1], [0, 1]);
-
-  // ONE simple continuous line - THIN and SOFT curves (not wide!)
-  // Green line from drawing: simple, clean, not going far outside
-  const path = `
-    M 15 8
-    L 85 8
-    C 88 8, 90 10, 90 14
-    C 90 24, 88 32, 85 42
-    L 15 42
-    C 12 42, 10 44, 10 48
-    C 10 58, 12 66, 15 76
-    L 85 76
-  `;
-
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
-      viewBox="0 0 100 84"
-      preserveAspectRatio="none"
-      style={{ zIndex: 0 }}
-    >
-      <motion.path
-        d={path}
-        fill="none"
-        stroke="rgba(34,211,238,0.8)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        style={{
-          pathLength,
-        }}
-      />
-      <defs>
-        {/* No gradient - just solid cyan */}
-      </defs>
-    </svg>
-  );
-};
-
 // ============ Individual Process Step ============
-const ProcessStep = ({ step, index, scrollProgress, threshold, order = "" }) => {
+const ProcessStep = ({ step, index, scrollProgress, threshold }) => {
   const opacity = useTransform(scrollProgress, [threshold - 0.05, threshold], [0, 1]);
   const y = useTransform(scrollProgress, [threshold - 0.05, threshold], [20, 0]);
-  const scale = useTransform(scrollProgress, [threshold - 0.05, threshold], [0.95, 1]);
 
   return (
     <motion.div
-      style={{ opacity, y, scale }}
-      className={`relative z-10 ${order}`}
+      style={{ opacity, y }}
+      className="relative flex items-start gap-8 md:gap-12"
     >
-      {/* Numbered Node */}
-      <motion.div
-        className="relative w-16 h-16 mb-6 mx-auto md:mx-0 z-20"
-        whileHover={{ scale: 1.1 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        {/* Outer glow ring */}
+      {/* Numbered Circle */}
+      <div className="relative flex-shrink-0 z-10">
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-cyan-400/40"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.7, 0.4],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        
-        {/* Inner circle */}
-        <div
-          className="absolute inset-0 rounded-full bg-gradient-to-br from-[#0a1220] to-[#0d1a2d] border border-cyan-400/30 flex items-center justify-center"
-          style={{
-            boxShadow: "0 0 30px rgba(34,211,238,0.3), inset 0 0 20px rgba(34,211,238,0.1)",
-          }}
+          className="relative w-16 h-16"
+          whileHover={{ scale: 1.1 }}
+          transition={{ type: "spring", stiffness: 300 }}
         >
-          <span className="mono text-lg font-bold text-cyan-300">{step.n}</span>
-        </div>
-      </motion.div>
+          {/* Outer glow ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full border-2 border-cyan-400/40"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.4, 0.7, 0.4],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: index * 0.2,
+            }}
+          />
+          
+          {/* Inner circle */}
+          <div
+            className="absolute inset-0 rounded-full bg-gradient-to-br from-[#0a1220] to-[#0d1a2d] border border-cyan-400/30 flex items-center justify-center"
+            style={{
+              boxShadow: "0 0 30px rgba(34,211,238,0.3), inset 0 0 20px rgba(34,211,238,0.1)",
+            }}
+          >
+            <span className="mono text-lg font-bold text-cyan-300">{step.n}</span>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Content */}
-      <div className="text-center md:text-left">
-        <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+      <div className="flex-1 pt-3">
+        {/* Duration badge */}
+        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-cyan-400/10 border border-cyan-400/20">
+          <span className="text-xs text-cyan-300 mono tracking-wider">{step.duration}</span>
+        </div>
+        
+        <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">
           {step.title}
         </h3>
-        <p className="text-sm text-[#9aa4b6] leading-relaxed">
+        <p className="text-base text-[#9aa4b6] leading-relaxed max-w-2xl">
           {step.desc}
         </p>
       </div>
