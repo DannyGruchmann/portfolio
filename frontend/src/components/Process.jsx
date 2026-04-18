@@ -48,32 +48,32 @@ const ProcessTimeline = ({ steps, scrollProgress }) => {
         
         {/* Horizontal Line 1 (Step 1 → 2) */}
         <AnimatedLine
-          className="hidden md:block absolute top-[32px] left-[15%] right-[15%]"
+          className="hidden md:block absolute top-[32px] left-[15%] right-[15%] z-0"
           progress={line1Progress}
           direction="horizontal"
         />
       </div>
 
       {/* Large outer curve from right (after step 2) down to row 2 */}
-      <div className="hidden md:block relative h-32 -my-16">
+      <div className="hidden md:block relative h-40 -my-20 z-0">
         <AnimatedOuterCurve progress={curve1Progress} direction="right-to-bottom" />
       </div>
 
-      {/* Row 2: Steps 3 & 4 (right to left) */}
+      {/* Row 2: Steps 3 & 4 - CORRECTED ORDER: 3 on RIGHT, 4 on LEFT */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mb-24 relative">
-        <ProcessStep step={steps[3]} index={3} scrollProgress={scrollProgress} threshold={0.5} order="md:order-2" />
-        <ProcessStep step={steps[2]} index={2} scrollProgress={scrollProgress} threshold={0.35} order="md:order-1" />
+        <ProcessStep step={steps[3]} index={3} scrollProgress={scrollProgress} threshold={0.5} order="md:order-1" />
+        <ProcessStep step={steps[2]} index={2} scrollProgress={scrollProgress} threshold={0.35} order="md:order-2" />
         
-        {/* Horizontal Line 2 (Step 4 → 3, reverse) */}
+        {/* Horizontal Line 2 (Step 3 → 4, right to left) */}
         <AnimatedLine
-          className="hidden md:block absolute top-[32px] left-[15%] right-[15%]"
+          className="hidden md:block absolute top-[32px] left-[15%] right-[15%] z-0"
           progress={line2Progress}
           direction="horizontal-reverse"
         />
       </div>
 
-      {/* Large outer curve from left (after step 3) down to row 3 */}
-      <div className="hidden md:block relative h-32 -my-16">
+      {/* Large outer curve from left (after step 4) down to row 3 */}
+      <div className="hidden md:block relative h-40 -my-20 z-0">
         <AnimatedOuterCurve progress={curve2Progress} direction="left-to-bottom" />
       </div>
 
@@ -84,7 +84,7 @@ const ProcessTimeline = ({ steps, scrollProgress }) => {
         
         {/* Horizontal Line 3 (Step 5 → 6) */}
         <AnimatedLine
-          className="hidden md:block absolute top-[32px] left-[15%] right-[15%]"
+          className="hidden md:block absolute top-[32px] left-[15%] right-[15%] z-0"
           progress={line3Progress}
           direction="horizontal"
         />
@@ -102,11 +102,11 @@ const ProcessStep = ({ step, index, scrollProgress, threshold, order = "" }) => 
   return (
     <motion.div
       style={{ opacity, y, scale }}
-      className={`relative ${order}`}
+      className={`relative z-10 ${order}`}
     >
       {/* Numbered Node */}
       <motion.div
-        className="relative w-16 h-16 mb-6 mx-auto md:mx-0"
+        className="relative w-16 h-16 mb-6 mx-auto md:mx-0 z-20"
         whileHover={{ scale: 1.1 }}
         transition={{ type: "spring", stiffness: 300 }}
       >
@@ -184,14 +184,14 @@ const AnimatedLine = ({ className, progress, direction }) => {
 const AnimatedOuterCurve = ({ progress, direction }) => {
   const pathLength = useTransform(progress, [0, 1], [0, 1]);
 
-  // Different paths for right-side and left-side curves
+  // Smaller curves that stay within viewport
   const path = direction === "right-to-bottom"
-    ? "M 85 0 Q 110 20, 110 50 Q 110 80, 85 100" // Goes right-outside, curves down, comes back
-    : "M 15 0 Q -10 20, -10 50 Q -10 80, 15 100"; // Goes left-outside, curves down, comes back
+    ? "M 85 0 C 95 15, 95 35, 85 50 C 75 65, 65 85, 15 100" // Right curve, connects to left side of next row
+    : "M 15 0 C 5 15, 5 35, 15 50 C 25 65, 35 85, 85 100"; // Left curve, connects to right side of next row
 
   return (
     <svg
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="absolute inset-0 w-full h-full pointer-events-none z-0"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
       style={{ overflow: "visible" }}
@@ -205,23 +205,6 @@ const AnimatedOuterCurve = ({ progress, direction }) => {
           pathLength,
         }}
       />
-      
-      {/* Glowing dot at the end of the line */}
-      <motion.circle
-        r="2"
-        fill="rgba(34,211,238,1)"
-        style={{
-          offsetDistance: useTransform(pathLength, [0, 1], ["0%", "100%"]),
-          offsetPath: `path('${path}')`,
-        }}
-      >
-        <animate
-          attributeName="r"
-          values="2;3;2"
-          dur="1.5s"
-          repeatCount="indefinite"
-        />
-      </motion.circle>
 
       <defs>
         <linearGradient id="outerCurveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
