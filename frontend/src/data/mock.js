@@ -177,7 +177,6 @@ export const translations = {
             { name: "Krypto-Payments", icon: "bitcoin" },
             { name: "Wallet / Blockchain", icon: "ethereum" },
             { name: "Debugging / Analyse", icon: "bug" },
-            { name: "Trading-Bot Basis", icon: "trading" },
           ],
         },
       ],

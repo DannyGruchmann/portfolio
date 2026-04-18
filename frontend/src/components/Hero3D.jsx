@@ -1,196 +1,425 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 
-// CSS/transform-based 3D scene: floating UI panels, dashboard mockups, grids.
-// Perspective container tracks mouse for subtle parallax tilt.
+// Interactive hologram scene with:
+// - Hologram screen (floating code + wireframe shapes)
+// - Two wireframe figures (man left, woman right)
+// - Eye/head tracking following cursor
+// - Click ripple effect on hologram
 const Hero3D = () => {
   const containerRef = useRef(null);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const rx = useSpring(useTransform(my, [-1, 1], [6, -6]), { stiffness: 70, damping: 18 });
-  const ry = useSpring(useTransform(mx, [-1, 1], [-8, 8]), { stiffness: 70, damping: 18 });
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [clickPos, setClickPos] = useState(null);
+  const [isHoverHologram, setIsHoverHologram] = useState(false);
 
+  // Mouse tracking
   const handleMove = (e) => {
+    if (!containerRef.current) return;
     const r = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    mx.set(x * 2);
-    my.set(y * 2);
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    setMousePos({ x, y });
+
+    // Check if hovering hologram screen (center area)
+    const centerX = r.width / 2;
+    const centerY = r.height / 2;
+    const distX = Math.abs(e.clientX - r.left - centerX);
+    const distY = Math.abs(e.clientY - r.top - centerY);
+    setIsHoverHologram(distX < 200 && distY < 180);
+  };
+
+  const handleClick = (e) => {
+    if (!isHoverHologram) return;
+    const r = containerRef.current.getBoundingClientRect();
+    setClickPos({
+      x: e.clientX - r.left,
+      y: e.clientY - r.top,
+    });
+    setTimeout(() => setClickPos(null), 1200);
   };
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
-  const yParallax1 = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const yParallax2 = useTransform(scrollYProgress, [0, 1], [0, 60]);
-  const yParallax3 = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMove}
+      onClick={handleClick}
       className="absolute inset-0 pointer-events-none"
       style={{ perspective: "1600px" }}
     >
-      <motion.div
-        style={{ rotateX: rx, rotateY: ry, opacity, transformStyle: "preserve-3d" }}
-        className="absolute inset-0"
-      >
-        {/* Large dashboard mockup - right side */}
-        <motion.div
-          style={{ y: yParallax1, transform: "translateZ(60px)" }}
-          initial={{ opacity: 0, x: 80, rotateZ: -6 }}
-          animate={{ opacity: 1, x: 0, rotateZ: 0 }}
-          transition={{ duration: 1.4, delay: 0.4, ease: [0.22, 0.9, 0.3, 1] }}
-          className="absolute right-[-80px] top-[22%] w-[640px] h-[400px] rounded-2xl overflow-hidden hidden md:block"
-        >
-          <div className="w-full h-full relative border border-[#1b2e4a] shadow-[0_40px_80px_-20px_rgba(14,90,200,0.35)] bg-gradient-to-br from-[#0b1526] to-[#060a12]">
-            {/* dashboard chrome */}
-            <div className="h-8 px-3 flex items-center gap-1.5 border-b border-white/5 bg-[#0a1220]">
-              <span className="w-2 h-2 rounded-full bg-[#ff5f57]" />
-              <span className="w-2 h-2 rounded-full bg-[#febc2e]" />
-              <span className="w-2 h-2 rounded-full bg-[#28c840]" />
-              <span className="ml-3 mono text-[10px] text-[#6b7a92]">helix.ops / dashboard</span>
-            </div>
-            <div className="p-5 grid grid-cols-3 gap-3">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="rounded-lg border border-white/5 bg-[#0a1424] p-3">
-                  <div className="h-2 w-10 rounded-full bg-[#1e6fd0]/50 mb-2" />
-                  <div className="mono text-[14px] text-[#c7e5ff]">
-                    {["$ 24.8k", "187%", "9.2/10"][i]}
-                  </div>
-                  <div className="mt-2 flex items-end gap-1 h-7">
-                    {[0.4, 0.6, 0.5, 0.8, 0.3, 0.9, 0.7].map((h, j) => (
-                      <div key={j} className="flex-1 rounded-t bg-gradient-to-t from-[#1c6fd0] to-[#7cc8ff]" style={{ height: `${h * 100}%` }} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {/* Chart area */}
-              <div className="col-span-3 mt-1 rounded-lg border border-white/5 bg-[#0a1424] p-3 h-[190px] relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <div className="mono text-[10.5px] text-[#6b7a92] tracking-wider">REVENUE / 30D</div>
-                  <div className="flex gap-1.5">
-                    <span className="tag !text-[9.5px] !py-0.5">Live</span>
-                  </div>
-                </div>
-                <svg viewBox="0 0 400 120" className="w-full h-[140px] mt-1" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#7cc8ff" stopOpacity="0.45" />
-                      <stop offset="100%" stopColor="#7cc8ff" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,90 C40,80 60,50 100,55 C140,60 160,30 200,35 C240,40 260,20 300,25 C340,30 360,10 400,15 L400,120 L0,120 Z"
-                    fill="url(#chartGrad)"
-                  />
-                  <path
-                    d="M0,90 C40,80 60,50 100,55 C140,60 160,30 200,35 C240,40 260,20 300,25 C340,30 360,10 400,15"
-                    fill="none"
-                    stroke="#7cc8ff"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+      <motion.div style={{ opacity }} className="absolute inset-0">
+        {/* Hologram Screen (center-back) */}
+        <HologramScreen clickPos={clickPos} />
 
-        {/* Secondary floating card - upper right */}
-        <motion.div
-          style={{ y: yParallax2, transform: "translateZ(120px)" }}
-          initial={{ opacity: 0, y: -30, rotateZ: 6 }}
-          animate={{ opacity: 1, y: 0, rotateZ: 4 }}
-          transition={{ duration: 1.4, delay: 0.8, ease: [0.22, 0.9, 0.3, 1] }}
-          className="absolute right-[-20px] top-[12%] w-[280px] rounded-xl overflow-hidden hidden md:block"
-        >
-          <div className="relative border border-[#264c74] bg-[#0a1322]/90 backdrop-blur-xl p-4 shadow-[0_30px_60px_-20px_rgba(124,200,255,0.35)]">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-[#22d3ee] animate-pulse" />
-              <div className="mono text-[10px] text-[#7cc8ff] tracking-[0.2em]">DEPLOY · READY</div>
-            </div>
-            <div className="mono text-[12px] leading-[1.7] text-[#c7e5ff]">
-              <div><span className="text-[#6b7a92]">$</span> vercel --prod</div>
-              <div><span className="text-[#6b7a92]">✓</span> Build completed</div>
-              <div><span className="text-[#6b7a92]">✓</span> 42 routes</div>
-              <div className="text-[#8ed6ff]">→ Live in 12s</div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Wireframe Figures */}
+        <WireframeFigures mousePos={mousePos} isHoverHologram={isHoverHologram} />
 
-        {/* Mobile app mockup - bottom left */}
-        <motion.div
-          style={{ y: yParallax3, transform: "translateZ(90px)" }}
-          initial={{ opacity: 0, y: 60, rotateZ: -8 }}
-          animate={{ opacity: 1, y: 0, rotateZ: -5 }}
-          transition={{ duration: 1.4, delay: 0.6, ease: [0.22, 0.9, 0.3, 1] }}
-          className="absolute left-[-40px] bottom-[8%] w-[210px] h-[380px] rounded-[32px] overflow-hidden hidden lg:block"
-        >
-          <div className="w-full h-full relative border border-[#1b2e4a] bg-[#05080f] shadow-[0_40px_80px_-20px_rgba(14,90,200,0.45)]">
-            <div className="absolute top-0 inset-x-0 h-6 flex items-center justify-center">
-              <div className="w-24 h-5 bg-black rounded-b-2xl" />
-            </div>
-            <div className="px-4 pt-10 pb-4">
-              <div className="mono text-[9px] text-[#6b7a92] tracking-wider mb-3">AURORA · HEALTH</div>
-              <div className="text-[18px] font-semibold text-white leading-tight">Guten Morgen, Alex</div>
-              <div className="text-[11px] text-[#8591a6] mt-0.5">3 Termine heute</div>
-
-              <div className="mt-5 rounded-xl border border-white/6 bg-gradient-to-br from-[#0c1a2e] to-[#081020] p-3">
-                <div className="flex items-center justify-between">
-                  <div className="mono text-[9px] text-[#7cc8ff] tracking-wider">HEART · 30D</div>
-                  <div className="text-[10px] text-[#c7e5ff]">68 bpm</div>
-                </div>
-                <svg viewBox="0 0 160 44" className="w-full h-10 mt-2">
-                  <path d="M0,22 L20,22 L28,8 L36,36 L44,16 L52,22 L160,22" fill="none" stroke="#22d3ee" strokeWidth="1.5" />
-                </svg>
-              </div>
-
-              {[0, 1].map((i) => (
-                <div key={i} className="mt-2.5 rounded-lg bg-white/[0.03] border border-white/5 p-2.5 flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#1c6fd0] to-[#7cc8ff]" />
-                  <div className="flex-1">
-                    <div className="text-[11px] text-white">{["Dr. Müller", "Lab Results"][i]}</div>
-                    <div className="text-[9px] text-[#8591a6] mono">{["09:30", "Verfügbar"][i]}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Code panel floating mid-left (desktop only) */}
-        <motion.div
-          style={{ y: yParallax2, transform: "translateZ(40px)" }}
-          initial={{ opacity: 0, scale: 0.9, rotateZ: 2 }}
-          animate={{ opacity: 1, scale: 1, rotateZ: -2 }}
-          transition={{ duration: 1.2, delay: 1, ease: [0.22, 0.9, 0.3, 1] }}
-          className="absolute left-[4%] top-[62%] w-[240px] rounded-xl overflow-hidden hidden xl:block"
-        >
-          <div className="border border-[#1b2e4a] bg-[#0a1220]/90 backdrop-blur p-3 shadow-2xl">
-            <div className="mono text-[10px] text-[#7cc8ff] tracking-wider mb-1.5">GIT · MAIN</div>
-            <div className="mono text-[11px] leading-[1.7]">
-              <div className="text-[#a8b2c3]"><span className="text-[#22d3ee]">+</span> feat(api): multi-tenant</div>
-              <div className="text-[#a8b2c3]"><span className="text-[#22d3ee]">+</span> perf(ssr): -380ms TTFB</div>
-              <div className="text-[#a8b2c3]"><span className="text-[#a78bfa]">~</span> refactor(auth): jwt</div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Decorative grid plane tilted */}
+        {/* Ambient glow */}
         <div
-          className="absolute inset-x-0 bottom-[-20%] h-[60%] opacity-40 pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            transform: "rotateX(60deg) translateZ(-50px)",
-            transformOrigin: "50% 0%",
-            backgroundImage:
-              "linear-gradient(rgba(124,200,255,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(124,200,255,0.25) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-            maskImage: "radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)",
+            background: "radial-gradient(ellipse at 50% 45%, rgba(34,211,238,0.08) 0%, transparent 60%)",
           }}
         />
       </motion.div>
     </div>
   );
 };
+
+// ============ Hologram Screen Component ============
+const HologramScreen = ({ clickPos }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.2, delay: 0.3 }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[420px] hidden md:block"
+      style={{
+        transform: "translateX(-50%) translateY(-50%) translateZ(-80px) rotateY(-8deg)",
+      }}
+    >
+      {/* Screen frame */}
+      <div className="relative w-full h-full rounded-2xl border-2 border-cyan-400/40 bg-gradient-to-br from-cyan-950/20 to-blue-950/10 backdrop-blur-sm overflow-hidden">
+        {/* Scan lines */}
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34,211,238,0.1) 2px, rgba(34,211,238,0.1) 4px)",
+          }}
+        />
+
+        {/* Floating code snippets */}
+        <div className="absolute inset-0 p-6 font-mono text-xs text-cyan-300/70 overflow-hidden">
+          <FloatingCode />
+        </div>
+
+        {/* Wireframe shapes */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 360" preserveAspectRatio="none">
+          <WireframeShapes />
+        </svg>
+
+        {/* Ripple effect on click */}
+        {clickPos && <RippleEffect x={clickPos.x} y={clickPos.y} />}
+
+        {/* Corner accents */}
+        {["top-left", "top-right", "bottom-left", "bottom-right"].map((pos) => (
+          <div
+            key={pos}
+            className={`absolute w-4 h-4 border-cyan-400 ${
+              pos.includes("top") ? "top-2" : "bottom-2"
+            } ${pos.includes("left") ? "left-2 border-l-2 border-t-2" : "right-2 border-r-2 border-t-2"} ${
+              pos.includes("bottom") ? "border-t-0 border-b-2" : ""
+            }`}
+          />
+        ))}
+
+        {/* Glow effect */}
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            boxShadow: "inset 0 0 60px rgba(34,211,238,0.3), 0 0 80px rgba(34,211,238,0.2)",
+          }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+// ============ Floating Code Component ============
+const FloatingCode = () => {
+  const codeLines = [
+    "const build = async () => {",
+    "  await deploy();",
+    "  return success;",
+    "};",
+    "",
+    "interface User {",
+    "  id: string;",
+    "  role: Role;",
+    "}",
+  ];
+
+  return (
+    <div className="space-y-1">
+      {codeLines.map((line, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 0.6, x: 0 }}
+          transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
+        >
+          {line}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+// ============ Wireframe Shapes Component ============
+const WireframeShapes = () => {
+  return (
+    <g>
+      {/* Rotating cube wireframe */}
+      <motion.g
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        style={{ transformOrigin: "300px 100px" }}
+      >
+        <path
+          d="M 280,80 L 320,80 L 320,120 L 280,120 Z"
+          fill="none"
+          stroke="rgba(34,211,238,0.4)"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M 290,90 L 330,90 L 330,130 L 290,130 Z"
+          fill="none"
+          stroke="rgba(34,211,238,0.3)"
+          strokeWidth="1.5"
+        />
+        <path d="M 280,80 L 290,90 M 320,80 L 330,90 M 320,120 L 330,130 M 280,120 L 290,130" stroke="rgba(34,211,238,0.3)" strokeWidth="1.5" />
+      </motion.g>
+
+      {/* Floating sphere grid */}
+      <motion.circle
+        cx="100"
+        cy="280"
+        r="30"
+        fill="none"
+        stroke="rgba(34,211,238,0.35)"
+        strokeWidth="1.5"
+        strokeDasharray="4 4"
+        animate={{ scale: [1, 1.1, 1], opacity: [0.35, 0.5, 0.35] }}
+        transition={{ duration: 3, repeat: Infinity }}
+      />
+    </g>
+  );
+};
+
+// ============ Ripple Effect Component ============
+const RippleEffect = ({ x, y }) => {
+  return (
+    <motion.div
+      className="absolute rounded-full border-2 border-cyan-300"
+      style={{
+        left: x,
+        top: y,
+        transform: "translate(-50%, -50%)",
+      }}
+      initial={{ width: 0, height: 0, opacity: 1 }}
+      animate={{ width: 300, height: 300, opacity: 0 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
+    />
+  );
+};
+
+// ============ Wireframe Figures Component ============
+const WireframeFigures = ({ mousePos, isHoverHologram }) => {
+  // Calculate rotation angles based on mouse position
+  const getRotation = (baseX, baseY) => {
+    const dx = mousePos.x - baseX;
+    const dy = mousePos.y - baseY;
+    const angle = Math.atan2(dy, dx);
+    const headRotate = angle * (180 / Math.PI) - 90;
+    const bodyRotate = headRotate * 0.3; // Body rotates less than head
+    return { headRotate, bodyRotate };
+  };
+
+  return (
+    <>
+      {/* Man (left) */}
+      <WireframeFigure
+        position="left"
+        gender="male"
+        mousePos={mousePos}
+        rotation={getRotation(0.25, 0.5)}
+        isPointing={isHoverHologram}
+      />
+
+      {/* Woman (right) */}
+      <WireframeFigure
+        position="right"
+        gender="female"
+        mousePos={mousePos}
+        rotation={getRotation(0.75, 0.5)}
+        isPointing={false}
+      />
+    </>
+  );
+};
+
+// ============ Individual Wireframe Figure ============
+const WireframeFigure = ({ position, gender, rotation, isPointing }) => {
+  const positionStyles = {
+    left: "left-[8%] bottom-[8%]",
+    right: "right-[8%] bottom-[8%]",
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, delay: position === "left" ? 0.6 : 0.8 }}
+      className={`absolute ${positionStyles[position]} hidden md:block`}
+    >
+      <svg
+        width="220"
+        height="380"
+        viewBox="0 0 180 320"
+        className="drop-shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+        style={{
+          filter: "drop-shadow(0 0 30px rgba(34,211,238,0.6)) drop-shadow(0 0 10px rgba(34,211,238,0.8))",
+        }}
+      >
+        <g
+          style={{
+            transform: `rotate(${rotation.bodyRotate * 0.5}deg)`,
+            transformOrigin: "90px 160px",
+            transition: "transform 0.3s ease-out",
+          }}
+        >
+          {/* Body */}
+          <WireframeBody />
+
+          {/* Head (rotates more) */}
+          <g
+            style={{
+              transform: `rotate(${rotation.headRotate * 0.8}deg)`,
+              transformOrigin: "90px 50px",
+              transition: "transform 0.3s ease-out",
+            }}
+          >
+            <WireframeHead gender={gender} />
+          </g>
+
+          {/* Arms (left arm points if hovering hologram) */}
+          <WireframeArms isPointing={isPointing} position={position} />
+        </g>
+      </svg>
+    </motion.div>
+  );
+};
+
+// ============ Wireframe Body Parts ============
+const WireframeHead = ({ gender }) => (
+  <g>
+    {/* Head ellipse */}
+    <ellipse cx="90" cy="50" rx="25" ry="30" fill="none" stroke="rgba(34,211,238,0.8)" strokeWidth="2" />
+    {/* Grid pattern on head */}
+    <path
+      d="M 65,40 Q 90,40 115,40 M 65,50 Q 90,50 115,50 M 65,60 Q 90,60 115,60"
+      stroke="rgba(34,211,238,0.4)"
+      strokeWidth="1"
+      fill="none"
+    />
+    <path d="M 80,25 L 80,75 M 90,25 L 90,75 M 100,25 L 100,75" stroke="rgba(34,211,238,0.4)" strokeWidth="1" />
+    
+    {/* Eyes */}
+    <circle cx="80" cy="48" r="3" fill="rgba(34,211,238,0.8)" />
+    <circle cx="100" cy="48" r="3" fill="rgba(34,211,238,0.8)" />
+
+    {/* Long hair for female */}
+    {gender === "female" && (
+      <>
+        {/* Left hair strands */}
+        <path
+          d="M 65,55 Q 55,75 58,105 L 60,120"
+          stroke="rgba(34,211,238,0.7)"
+          strokeWidth="2"
+          fill="none"
+        />
+        <path
+          d="M 70,60 Q 65,80 68,105 L 70,115"
+          stroke="rgba(34,211,238,0.6)"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        
+        {/* Right hair strands */}
+        <path
+          d="M 115,55 Q 125,75 122,105 L 120,120"
+          stroke="rgba(34,211,238,0.7)"
+          strokeWidth="2"
+          fill="none"
+        />
+        <path
+          d="M 110,60 Q 115,80 112,105 L 110,115"
+          stroke="rgba(34,211,238,0.6)"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        
+        {/* Back hair volume */}
+        <path
+          d="M 75,65 Q 90,75 105,65"
+          stroke="rgba(34,211,238,0.5)"
+          strokeWidth="1.5"
+          fill="none"
+        />
+      </>
+    )}
+  </g>
+);
+
+const WireframeBody = () => (
+  <g>
+    {/* Neck */}
+    <line x1="85" y1="80" x2="85" y2="95" stroke="rgba(34,211,238,0.8)" strokeWidth="2" />
+    <line x1="95" y1="80" x2="95" y2="95" stroke="rgba(34,211,238,0.8)" strokeWidth="2" />
+
+    {/* Torso wireframe */}
+    <path
+      d="M 70,95 L 110,95 L 105,180 L 75,180 Z"
+      fill="none"
+      stroke="rgba(34,211,238,0.8)"
+      strokeWidth="2"
+    />
+    {/* Torso grid */}
+    <path d="M 75,110 L 105,110 M 75,130 L 105,130 M 75,150 L 105,150" stroke="rgba(34,211,238,0.4)" strokeWidth="1" />
+    <path d="M 80,95 L 78,180 M 90,95 L 90,180 M 100,95 L 102,180" stroke="rgba(34,211,238,0.4)" strokeWidth="1" />
+
+    {/* Legs */}
+    <path d="M 80,180 L 75,260 L 70,280" stroke="rgba(34,211,238,0.8)" strokeWidth="2" fill="none" />
+    <path d="M 100,180 L 105,260 L 110,280" stroke="rgba(34,211,238,0.8)" strokeWidth="2" fill="none" />
+    
+    {/* Leg grid */}
+    <path d="M 78,200 L 72,200 M 77,220 L 72,220 M 76,240 L 71,240" stroke="rgba(34,211,238,0.35)" strokeWidth="0.8" />
+    <path d="M 102,200 L 107,200 M 103,220 L 107,220 M 104,240 L 108,240" stroke="rgba(34,211,238,0.35)" strokeWidth="0.8" />
+
+    {/* Feet */}
+    <ellipse cx="70" cy="285" rx="8" ry="4" fill="none" stroke="rgba(34,211,238,0.5)" strokeWidth="1.5" />
+    <ellipse cx="110" cy="285" rx="8" ry="4" fill="none" stroke="rgba(34,211,238,0.5)" strokeWidth="1.5" />
+  </g>
+);
+
+const WireframeArms = ({ isPointing, position }) => (
+  <g>
+    {/* Left arm (crosses arms or points) */}
+    {isPointing && position === "left" ? (
+      <motion.g
+        initial={{ rotate: 0 }}
+        animate={{ rotate: -45 }}
+        transition={{ duration: 0.4 }}
+        style={{ transformOrigin: "70px 110px" }}
+      >
+        <path d="M 70,110 L 50,140 L 30,150" stroke="rgba(34,211,238,0.8)" strokeWidth="2" fill="none" />
+        <circle cx="30" cy="150" r="4" fill="rgba(34,211,238,0.9)" />
+      </motion.g>
+    ) : (
+      <path d="M 70,110 L 85,130 L 90,145" stroke="rgba(34,211,238,0.8)" strokeWidth="2" fill="none" />
+    )}
+
+    {/* Right arm (always crossed) */}
+    <path d="M 110,110 L 95,130 L 90,145" stroke="rgba(34,211,238,0.8)" strokeWidth="2" fill="none" />
+
+    {/* Hand markers */}
+    <circle cx="90" cy="145" r="3" fill="rgba(34,211,238,0.8)" />
+    {!isPointing || position !== "left" ? (
+      <circle cx="90" cy="145" r="3" fill="rgba(34,211,238,0.8)" />
+    ) : null}
+  </g>
+);
 
 export default Hero3D;
