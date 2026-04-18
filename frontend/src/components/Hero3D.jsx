@@ -1,45 +1,32 @@
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-// DNA/Helix structure made of code lines
-// Continuous rotation, data flow particles, elegant and futuristic
+// Floating 3D Particles: Code symbols, brackets, tech icons
+// Slow movement through space with parallax, subtle rotation, cyan/blue glow
 const Hero3D = () => {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ 
-    target: containerRef, 
-    offset: ["start start", "end start"] 
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
   });
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.6], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
     <div
       ref={containerRef}
       className="absolute inset-0 pointer-events-none overflow-hidden"
-      style={{ perspective: "1600px" }}
+      style={{ perspective: "1200px" }}
     >
-      <motion.div 
-        style={{ opacity, scale }} 
-        className="absolute inset-0 flex items-center justify-center"
-      >
-        {/* Main DNA Helix Structure */}
-        <DNAHelix />
+      <motion.div style={{ opacity }} className="absolute inset-0">
+        {/* Floating particles */}
+        <FloatingParticles scrollYProgress={scrollYProgress} />
 
         {/* Ambient glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 50% 50%, rgba(34,211,238,0.12) 0%, rgba(14,165,233,0.06) 40%, transparent 70%)",
-          }}
-        />
-        
-        {/* Vertical light ray */}
-        <div
-          className="absolute left-1/2 top-0 bottom-0 w-px pointer-events-none"
-          style={{
-            background: "linear-gradient(180deg, transparent, rgba(34,211,238,0.3) 30%, rgba(34,211,238,0.3) 70%, transparent)",
-            boxShadow: "0 0 40px rgba(34,211,238,0.5)",
-            transform: "translateX(-50%)",
+            background:
+              "radial-gradient(ellipse at 50% 40%, rgba(34,211,238,0.08) 0%, rgba(14,165,233,0.04) 50%, transparent 80%)",
           }}
         />
       </motion.div>
@@ -47,292 +34,142 @@ const Hero3D = () => {
   );
 };
 
-// ============ DNA Helix Component ============
-const DNAHelix = () => {
-  // Generate helix points (double strand)
-  const numPoints = 30;
-  const points1 = [];
-  const points2 = [];
-  const connections = [];
+// ============ Floating Particles Component ============
+const FloatingParticles = ({ scrollYProgress }) => {
+  // Generate random particles with different types
+  const particles = useMemo(() => {
+    const codeSymbols = [
+      "{", "}", "[", "]", "<", ">", "(", ")",
+      "const", "let", "async", "await", "=>", 
+      "function", "return", "import", "export",
+      "class", "interface", "type", "void",
+      "if", "for", "map", "filter",
+    ];
 
-  for (let i = 0; i < numPoints; i++) {
-    const angle = (i / numPoints) * Math.PI * 4; // 2 full rotations
-    const y = (i / numPoints) * 700 - 150; // Vertical distribution
-    const radius = 160;
+    const techSymbols = [
+      "⚛", // React-like
+      "◆", // Database
+      "⬡", // Hexagon (API)
+      "▲", // Triangle (Vercel-like)
+      "●", // Circle
+      "■", // Square
+      "◇", // Diamond
+    ];
 
-    // First strand
-    const x1 = Math.cos(angle) * radius;
-    const z1 = Math.sin(angle) * radius;
-    points1.push({ x: x1, y, z: z1, angle, index: i });
+    const allSymbols = [...codeSymbols, ...techSymbols];
+    const particleCount = 40;
+    
+    return Array.from({ length: particleCount }, (_, i) => {
+      const isTechSymbol = Math.random() > 0.7;
+      const symbol = isTechSymbol
+        ? techSymbols[Math.floor(Math.random() * techSymbols.length)]
+        : codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
 
-    // Second strand (180° offset)
-    const x2 = Math.cos(angle + Math.PI) * radius;
-    const z2 = Math.sin(angle + Math.PI) * radius;
-    points2.push({ x: x2, y, z: z2, angle: angle + Math.PI, index: i });
-
-    // Every 3rd point has a connection (like DNA base pairs)
-    if (i % 3 === 0) {
-      connections.push({ p1: { x: x1, y, z: z1 }, p2: { x: x2, y, z: z2 }, index: i });
-    }
-  }
-
-  return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <motion.div
-        animate={{ rotateY: 360 }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        style={{
-          transformStyle: "preserve-3d",
-          width: "600px",
-          height: "600px",
-          position: "relative",
-        }}
-      >
-        {/* First helix strand */}
-        {points1.map((point, i) => (
-          <HelixNode
-            key={`strand1-${i}`}
-            point={point}
-            delay={i * 0.05}
-            strand={1}
-          />
-        ))}
-
-        {/* Second helix strand */}
-        {points2.map((point, i) => (
-          <HelixNode
-            key={`strand2-${i}`}
-            point={point}
-            delay={i * 0.05}
-            strand={2}
-          />
-        ))}
-
-        {/* Base pair connections */}
-        {connections.map((conn, i) => (
-          <BasePairConnection
-            key={`connection-${i}`}
-            p1={conn.p1}
-            p2={conn.p2}
-            delay={i * 0.15}
-          />
-        ))}
-
-        {/* Flowing data particles */}
-        <DataParticles points={points1} />
-        <DataParticles points={points2} delay={1.5} />
-      </motion.div>
-    </div>
-  );
-};
-
-// ============ Helix Node (Code snippet on each point) ============
-const HelixNode = ({ point, delay, strand }) => {
-  const codeSnippets = [
-    "const", "async", "await", "=>", "function", "return", 
-    "import", "export", "class", "interface", "type", "let",
-    "if", "for", "map", "filter", "reduce", "promise"
-  ];
-  
-  const snippet = codeSnippets[point.index % codeSnippets.length];
-  const color = strand === 1 ? "rgba(34,211,238,0.9)" : "rgba(124,200,255,0.9)";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay }}
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: `translate3d(${point.x}px, ${point.y}px, ${point.z}px)`,
-        transformStyle: "preserve-3d",
-      }}
-    >
-      {/* Glowing sphere with pulse */}
-      <motion.div
-        className="absolute"
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.8, 1, 0.8],
-        }}
-        transition={{
-          duration: 2,
-          delay: delay,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          width: "12px",
-          height: "12px",
-          borderRadius: "50%",
-          backgroundColor: color,
-          boxShadow: `0 0 30px ${color}, 0 0 60px ${color}, 0 0 90px ${color}`,
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-      
-      {/* Outer ring */}
-      <motion.div
-        className="absolute"
-        animate={{
-          scale: [1, 1.8, 1],
-          opacity: [0.6, 0, 0.6],
-        }}
-        transition={{
-          duration: 2,
-          delay: delay,
-          repeat: Infinity,
-          ease: "easeOut",
-        }}
-        style={{
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          border: `1px solid ${color}`,
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-
-      {/* Code snippet label */}
-      <motion.div
-        className="mono text-[10px] absolute whitespace-nowrap"
-        animate={{
-          opacity: [0.7, 1, 0.7],
-        }}
-        transition={{
-          duration: 3,
-          delay: delay * 0.5,
-          repeat: Infinity,
-        }}
-        style={{
-          color,
-          transform: "translate(-50%, 16px) rotateY(0deg)",
-          textShadow: `0 0 15px ${color}, 0 0 30px ${color}`,
-          fontWeight: "700",
-          letterSpacing: "0.08em",
-        }}
-      >
-        {snippet}
-      </motion.div>
-    </motion.div>
-  );
-};
-
-// ============ Base Pair Connection ============
-const BasePairConnection = ({ p1, p2, delay }) => {
-  // Calculate 2D projection for line
-  const x1 = p1.x;
-  const y1 = p1.y;
-  const x2 = p2.x;
-  const y2 = p2.y;
-
-  const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scaleX: 0 }}
-      animate={{ 
-        opacity: [0.5, 0.8, 0.5],
-        scaleX: 1,
-      }}
-      transition={{ 
-        opacity: { duration: 2, repeat: Infinity, delay },
-        scaleX: { duration: 0.8, delay }
-      }}
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        width: `${length}px`,
-        height: "2px",
-        background: "linear-gradient(90deg, rgba(34,211,238,0.8), rgba(124,200,255,0.9), rgba(34,211,238,0.8))",
-        transform: `translate3d(${x1}px, ${y1}px, ${(p1.z + p2.z) / 2}px) rotate(${angle}deg)`,
-        transformOrigin: "0 0",
-        transformStyle: "preserve-3d",
-        boxShadow: "0 0 20px rgba(34,211,238,0.8), 0 0 40px rgba(34,211,238,0.5)",
-      }}
-    />
-  );
-};
-
-// ============ Data Flow Particles ============
-const DataParticles = ({ points, delay = 0 }) => {
-  const particles = [0, 1, 2, 3, 4].map((i) => ({
-    id: i,
-    offset: (i / 5) * points.length,
-  }));
+      return {
+        id: i,
+        symbol,
+        isTechSymbol,
+        // Random position
+        x: Math.random() * 100, // percentage
+        y: Math.random() * 100,
+        // Random depth (z-index simulation)
+        z: Math.random() * 300 - 150, // -150 to 150
+        // Random scale based on depth
+        scale: 0.4 + Math.random() * 0.8,
+        // Random animation duration
+        duration: 20 + Math.random() * 20,
+        // Random delay
+        delay: Math.random() * 5,
+        // Random rotation speed
+        rotationDuration: 15 + Math.random() * 25,
+      };
+    });
+  }, []);
 
   return (
     <>
       {particles.map((particle) => (
-        <DataParticle
+        <FloatingParticle
           key={particle.id}
-          points={points}
-          offset={particle.offset}
-          delay={delay + particle.id * 0.5}
+          particle={particle}
+          scrollYProgress={scrollYProgress}
         />
       ))}
     </>
   );
 };
 
-const DataParticle = ({ points, offset, delay }) => {
+// ============ Individual Floating Particle ============
+const FloatingParticle = ({ particle, scrollYProgress }) => {
+  // Parallax movement based on depth
+  const parallaxFactor = particle.z / 300; // -0.5 to 0.5
+  const yParallax = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, -100 * parallaxFactor]
+  );
+
+  // Color based on type and depth
+  const baseColor = particle.isTechSymbol
+    ? "rgba(34, 211, 238, 0.9)" // Cyan for tech symbols
+    : "rgba(124, 200, 255, 0.85)"; // Light blue for code
+
+  const glowIntensity = particle.z > 0 ? 0.8 : 0.5; // Closer = brighter
+  const fontSize = particle.isTechSymbol ? 24 : 14;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      animate={{
-        opacity: [0, 1, 1, 0],
-      }}
-      transition={{
-        duration: 4,
-        delay,
-        repeat: Infinity,
-        ease: "linear",
-      }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1, delay: particle.delay }}
       style={{
         position: "absolute",
-        left: "50%",
-        top: "50%",
+        left: `${particle.x}%`,
+        top: `${particle.y}%`,
+        y: yParallax,
+        transform: `translateZ(${particle.z}px) scale(${particle.scale})`,
         transformStyle: "preserve-3d",
       }}
     >
-      {points.map((point, i) => {
-        const progress = ((i + offset) % points.length) / points.length;
-        const isActive = progress > 0.45 && progress < 0.55; // Only show at specific position
-
-        if (!isActive) return null;
-
-        return (
-          <motion.div
-            key={i}
-            animate={{
-              x: [point.x, points[(i + 1) % points.length]?.x || point.x],
-              y: [point.y, points[(i + 1) % points.length]?.y || point.y],
-              z: [point.z, points[(i + 1) % points.length]?.z || point.z],
-            }}
-            transition={{
-              duration: 0.5,
-              ease: "linear",
-            }}
-            style={{
-              position: "absolute",
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255,255,255,0.9)",
-              boxShadow: "0 0 20px rgba(34,211,238,1), 0 0 40px rgba(34,211,238,0.8)",
-              transform: `translate3d(${point.x}px, ${point.y}px, ${point.z}px)`,
-            }}
-          />
-        );
-      })}
+      <motion.div
+        animate={{
+          y: [0, -30, 0],
+          x: [0, 15, 0],
+          rotateZ: [0, 360],
+        }}
+        transition={{
+          y: {
+            duration: particle.duration,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          x: {
+            duration: particle.duration * 0.7,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          rotateZ: {
+            duration: particle.rotationDuration,
+            repeat: Infinity,
+            ease: "linear",
+          },
+        }}
+        className="mono"
+        style={{
+          fontSize: `${fontSize}px`,
+          fontWeight: particle.isTechSymbol ? "400" : "600",
+          color: baseColor,
+          textShadow: `
+            0 0 ${20 * glowIntensity}px ${baseColor},
+            0 0 ${40 * glowIntensity}px ${baseColor},
+            0 0 ${60 * glowIntensity}px rgba(34, 211, 238, ${0.3 * glowIntensity})
+          `,
+          filter: `blur(${particle.z < -50 ? 0.5 : 0}px)`, // Slight blur for far particles
+          opacity: particle.z < -100 ? 0.4 : particle.z > 100 ? 1 : 0.7,
+        }}
+      >
+        {particle.symbol}
+      </motion.div>
     </motion.div>
   );
 };
