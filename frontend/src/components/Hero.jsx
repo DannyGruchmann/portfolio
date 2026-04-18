@@ -13,7 +13,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-hidden pt-[120px] pb-[120px] min-h-[100svh] flex items-center">
+    <section className="relative pt-[120px] pb-[120px] min-h-[100svh] flex items-center">
       {/* Background layers */}
       <div className="absolute inset-0 bg-grid opacity-[0.35]" />
       <div className="orb w-[520px] h-[520px] bg-[#1e73c8] -top-40 -right-40" />

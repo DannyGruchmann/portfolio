@@ -251,26 +251,37 @@ export const translations = {
     process: {
       eyebrow: "Prozess",
       title: "So sieht die Zusammenarbeit aus",
+      sub: "Klarer Ablauf, transparente Kommunikation, professionelle Umsetzung — von der ersten Idee bis zum Launch und darüber hinaus.",
       steps: [
         {
           n: "01",
-          title: "Discovery",
-          desc: "Kostenloses Erstgespräch. Ziele verstehen, Scope definieren, technische Optionen abstecken.",
+          title: "Erstgespräch",
+          desc: "Projekt, Ziele und Anforderungen verstehen.",
         },
         {
           n: "02",
-          title: "Konzept & Angebot",
-          desc: "Klare Roadmap, technisches Konzept und transparentes Festpreis- oder Sprint-Angebot.",
+          title: "Scope & Strategie",
+          desc: "Umfang definieren, Prioritäten setzen und die passende technische Richtung festlegen.",
         },
         {
           n: "03",
-          title: "Build",
-          desc: "Iterative Entwicklung in Sprints. Wöchentliche Demos. Kein Blackbox-Prozess.",
+          title: "Konzept & Angebot",
+          desc: "Klare Roadmap, technische Empfehlung und transparentes Angebot.",
         },
         {
           n: "04",
-          title: "Launch & Care",
-          desc: "Deployment, Monitoring und optionale Weiterentwicklung im Retainer-Modell.",
+          title: "Design & Struktur",
+          desc: "Struktur, Nutzerführung und visuelle Richtung vor der Umsetzung abstimmen.",
+        },
+        {
+          n: "05",
+          title: "Entwicklung & Launch",
+          desc: "Saubere Umsetzung, Testing und strukturierter Go-live.",
+        },
+        {
+          n: "06",
+          title: "Retainer & Weiterentwicklung",
+          desc: "Optionale laufende Betreuung für Updates, Optimierungen und neue Features.",
         },
       ],
     },
@@ -501,11 +512,14 @@ export const translations = {
     process: {
       eyebrow: "Process",
       title: "How we'll work together",
+      sub: "Clear workflow, transparent communication, professional execution — from first idea to launch and beyond.",
       steps: [
-        { n: "01", title: "Discovery", desc: "Free intro call. Understand goals, define scope, outline technical options." },
-        { n: "02", title: "Concept & quote", desc: "Clear roadmap, technical concept and transparent fixed-price or sprint offer." },
-        { n: "03", title: "Build", desc: "Iterative development in sprints. Weekly demos. Zero black-box process." },
-        { n: "04", title: "Launch & care", desc: "Deployment, monitoring and optional retainer-based evolution." },
+        { n: "01", title: "Intro call", desc: "Understand your project, goals and requirements." },
+        { n: "02", title: "Scope & strategy", desc: "Define scope, set priorities and determine the right technical direction." },
+        { n: "03", title: "Concept & quote", desc: "Clear roadmap, technical recommendation and transparent proposal." },
+        { n: "04", title: "Design & structure", desc: "Align structure, user flows and visual direction before development." },
+        { n: "05", title: "Development & launch", desc: "Clean execution, testing and structured go-live." },
+        { n: "06", title: "Retainer & evolution", desc: "Optional ongoing support for updates, optimizations and new features." },
       ],
     },
     cta: {
