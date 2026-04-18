@@ -62,44 +62,38 @@ const ProcessTimeline = ({ steps, scrollProgress }) => {
 const ContinuousFlowingLine = ({ scrollProgress }) => {
   const pathLength = useTransform(scrollProgress, [0, 1], [0, 1]);
 
-  // ONE path that flows through all 6 nodes
-  // Adjusted coordinates to match actual grid positions
+  // ONE simple continuous line - THIN and SOFT curves (not wide!)
+  // Green line from drawing: simple, clean, not going far outside
   const path = `
     M 15 8
     L 85 8
-    C 92 8, 96 12, 96 20
-    C 96 30, 92 38, 85 42
-    L 85 96
-    L 15 96
-    C 8 96, 4 100, 4 108
-    C 4 118, 8 126, 15 130
-    L 15 184
-    L 85 184
+    C 88 8, 90 10, 90 14
+    C 90 24, 88 32, 85 42
+    L 15 42
+    C 12 42, 10 44, 10 48
+    C 10 58, 12 66, 15 76
+    L 85 76
   `;
 
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
-      viewBox="0 0 100 280"
+      viewBox="0 0 100 84"
       preserveAspectRatio="none"
       style={{ zIndex: 0 }}
     >
       <motion.path
         d={path}
         fill="none"
-        stroke="url(#flowGradient)"
-        strokeWidth="2"
+        stroke="rgba(34,211,238,0.8)"
+        strokeWidth="1.5"
         strokeLinecap="round"
         style={{
           pathLength,
         }}
       />
       <defs>
-        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="rgba(34,211,238,0.8)" />
-          <stop offset="50%" stopColor="rgba(34,211,238,0.9)" />
-          <stop offset="100%" stopColor="rgba(34,211,238,0.8)" />
-        </linearGradient>
+        {/* No gradient - just solid cyan */}
       </defs>
     </svg>
   );
