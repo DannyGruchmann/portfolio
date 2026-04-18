@@ -54,9 +54,9 @@ const ProcessTimeline = ({ steps, scrollProgress }) => {
         />
       </div>
 
-      {/* Curve Down 1 */}
-      <div className="hidden md:block relative h-20 -my-12">
-        <AnimatedCurve progress={curve1Progress} direction="down-right" />
+      {/* Large outer curve from right (after step 2) down to row 2 */}
+      <div className="hidden md:block relative h-32 -my-16">
+        <AnimatedOuterCurve progress={curve1Progress} direction="right-to-bottom" />
       </div>
 
       {/* Row 2: Steps 3 & 4 (right to left) */}
@@ -72,9 +72,9 @@ const ProcessTimeline = ({ steps, scrollProgress }) => {
         />
       </div>
 
-      {/* Curve Down 2 */}
-      <div className="hidden md:block relative h-20 -my-12">
-        <AnimatedCurve progress={curve2Progress} direction="down-left" />
+      {/* Large outer curve from left (after step 3) down to row 3 */}
+      <div className="hidden md:block relative h-32 -my-16">
+        <AnimatedOuterCurve progress={curve2Progress} direction="left-to-bottom" />
       </div>
 
       {/* Row 3: Steps 5 & 6 (left to right) */}
@@ -180,33 +180,53 @@ const AnimatedLine = ({ className, progress, direction }) => {
   );
 };
 
-// ============ Animated Curve ============
-const AnimatedCurve = ({ progress, direction }) => {
+// ============ Animated Outer Curve (Large S-curve around nodes) ============
+const AnimatedOuterCurve = ({ progress, direction }) => {
   const pathLength = useTransform(progress, [0, 1], [0, 1]);
 
-  const isDownRight = direction === "down-right";
-  const startX = isDownRight ? "85%" : "15%";
-  const endX = isDownRight ? "15%" : "85%";
+  // Different paths for right-side and left-side curves
+  const path = direction === "right-to-bottom"
+    ? "M 85 0 Q 110 20, 110 50 Q 110 80, 85 100" // Goes right-outside, curves down, comes back
+    : "M 15 0 Q -10 20, -10 50 Q -10 80, 15 100"; // Goes left-outside, curves down, comes back
 
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
+      style={{ overflow: "visible" }}
     >
       <motion.path
-        d={`M ${isDownRight ? 85 : 15} 0 Q ${isDownRight ? 85 : 15} 50, ${isDownRight ? 15 : 85} 100`}
+        d={path}
         fill="none"
-        stroke="url(#curveGradient)"
+        stroke="url(#outerCurveGradient)"
         strokeWidth="2"
         style={{
           pathLength,
         }}
       />
+      
+      {/* Glowing dot at the end of the line */}
+      <motion.circle
+        r="2"
+        fill="rgba(34,211,238,1)"
+        style={{
+          offsetDistance: useTransform(pathLength, [0, 1], ["0%", "100%"]),
+          offsetPath: `path('${path}')`,
+        }}
+      >
+        <animate
+          attributeName="r"
+          values="2;3;2"
+          dur="1.5s"
+          repeatCount="indefinite"
+        />
+      </motion.circle>
+
       <defs>
-        <linearGradient id="curveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id="outerCurveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="rgba(34,211,238,0.8)" />
-          <stop offset="50%" stopColor="rgba(34,211,238,0.6)" />
+          <stop offset="50%" stopColor="rgba(34,211,238,0.7)" />
           <stop offset="100%" stopColor="rgba(34,211,238,0.8)" />
         </linearGradient>
       </defs>
