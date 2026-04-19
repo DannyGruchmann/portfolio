@@ -6,9 +6,11 @@ import { useLang } from "../contexts/LanguageContext";
 import { contactInfo } from "../data/mock";
 import { useToast } from "../hooks/use-toast";
 
-const BACKEND_URL =
-  process.env.REACT_APP_BACKEND_URL || "https://gruchmann-labs.preview.emergentagent.com";
-const API = `${BACKEND_URL}/api`;
+const configuredBackendUrl =
+  process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL !== "undefined"
+    ? process.env.REACT_APP_BACKEND_URL
+    : "";
+const API = configuredBackendUrl ? `${configuredBackendUrl}/api` : "/api";
 
 const Contact = () => {
   const { t } = useLang();
