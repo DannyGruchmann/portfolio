@@ -4,11 +4,13 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import smtplib
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+from email.message import EmailMessage
 
 
 ROOT_DIR = Path(__file__).parent
@@ -98,6 +100,65 @@ class Inquiry(BaseModel):
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+def _env_flag(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _send_inquiry_notification(inquiry: Inquiry) -> None:
+    smtp_host = os.environ.get("SMTP_HOST", "").strip()
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_username = os.environ.get("SMTP_USERNAME", "").strip()
+    smtp_password = os.environ.get("SMTP_PASSWORD", "").strip()
+    smtp_from = os.environ.get("SMTP_FROM_EMAIL", "").strip()
+    notify_to = os.environ.get("INQUIRY_NOTIFICATION_TO", "").strip()
+    use_tls = _env_flag("SMTP_USE_TLS", default=True)
+    use_ssl = _env_flag("SMTP_USE_SSL", default=False)
+
+    if not smtp_host or not smtp_from or not notify_to:
+        logger.info(
+            "Inquiry notification skipped because SMTP is not fully configured "
+            "(SMTP_HOST, SMTP_FROM_EMAIL, INQUIRY_NOTIFICATION_TO)"
+        )
+        return
+
+    company = inquiry.company or "Nicht angegeben"
+    budget = inquiry.budget or "Nicht angegeben"
+    created_at = inquiry.createdAt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    msg = EmailMessage()
+    msg["Subject"] = f"Neue Portfolio-Anfrage von {inquiry.name}"
+    msg["From"] = smtp_from
+    msg["To"] = notify_to
+    msg["Reply-To"] = str(inquiry.email)
+    msg.set_content(
+        "Neue Anfrage ueber das Portfolio-Formular\n\n"
+        f"Name: {inquiry.name}\n"
+        f"E-Mail: {inquiry.email}\n"
+        f"Firma: {company}\n"
+        f"Budget: {budget}\n"
+        f"Zeitpunkt: {created_at}\n\n"
+        "Nachricht:\n"
+        f"{inquiry.message}\n"
+    )
+
+    if use_ssl:
+        with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=20) as server:
+            if smtp_username and smtp_password:
+                server.login(smtp_username, smtp_password)
+            server.send_message(msg)
+        return
+
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+        if use_tls:
+            server.starttls()
+        if smtp_username and smtp_password:
+            server.login(smtp_username, smtp_password)
+        server.send_message(msg)
+
+
 @api_router.post("/inquiries", response_model=Inquiry, status_code=201)
 async def create_inquiry(payload: InquiryCreate):
     inq = Inquiry(
@@ -111,6 +172,10 @@ async def create_inquiry(payload: InquiryCreate):
     doc["createdAt"] = doc["createdAt"].isoformat()
     await db.inquiries.insert_one(doc)
     logger.info("New inquiry from %s <%s>", inq.name, inq.email)
+    try:
+        _send_inquiry_notification(inq)
+    except Exception:
+        logger.exception("Failed to send inquiry notification email")
     return inq
 
 

@@ -64,6 +64,18 @@ File: `frontend/src/components/Contact.jsx`
 
 Backend base URL: `process.env.REACT_APP_BACKEND_URL` → `${BACKEND_URL}/api`
 
+## Cloudflare Pages Function
+For the Cloudflare deployment, the contact form can be handled directly by a Pages Function at `frontend/functions/api/inquiries.js`.
+
+Cloudflare requirements:
+- Add a `send_email` binding named `EMAIL`
+- Set `CONTACT_FROM_EMAIL` to a sender on your domain, for example `kontakt@dannygruchmann.com`
+- Set `CONTACT_TO_EMAIL` to your inbox, for example `dannygruchmann@proton.me`
+
+Frontend behavior:
+- If `REACT_APP_BACKEND_URL` is set, the frontend uses that external backend
+- If `REACT_APP_BACKEND_URL` is unset, the frontend posts to the same-origin Cloudflare route `/api/inquiries`
+
 ## Non-changes
 - Routing, auth, env files, Kubernetes ingress → untouched
 - All API routes stay prefixed with `/api`
