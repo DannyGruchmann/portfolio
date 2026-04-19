@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
 const fallbackClassesBySize = {
-  sm: "w-8 h-8 text-[13px]",
-  md: "w-9 h-9 text-[14px]",
+  sm: "w-10 h-10 text-[14px]",
+  md: "w-12 h-12 text-[15px]",
 };
 
 const imageClassesBySize = {
-  sm: "h-8 w-auto max-w-[120px]",
-  md: "h-9 w-auto max-w-[140px]",
+  sm: "h-10 w-auto max-w-[156px]",
+  md: "h-12 w-auto max-w-[180px]",
 };
 
 const BrandLogo = ({ size = "sm", className = "", alt = "Danny Gruchmann logo" }) => {
@@ -16,7 +16,7 @@ const BrandLogo = ({ size = "sm", className = "", alt = "Danny Gruchmann logo" }
   if (!imageMissing) {
     return (
       <img
-        src="/brand/dg-logo.png"
+        src="/brand/dg-logo.png?v=2"
         alt={alt}
         className={`${imageClassesBySize[size] || imageClassesBySize.sm} ${className}`}
         onError={() => setImageMissing(true)}
