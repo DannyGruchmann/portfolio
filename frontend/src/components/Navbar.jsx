@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
+import BrandLogo from "./BrandLogo";
 
 const Navbar = () => {
   const { t, lang, toggle } = useLang();
@@ -49,10 +50,7 @@ const Navbar = () => {
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
             className="flex items-center gap-2.5 group"
           >
-            <div className="relative w-8 h-8 rounded-md border border-white/10 bg-gradient-to-br from-[#0b1622] to-[#07080c] overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(124,200,255,0.55),transparent_60%)]" />
-              <div className="absolute inset-0 flex items-center justify-center mono text-[13px] font-semibold text-[#cfe8ff]">DG</div>
-            </div>
+            <BrandLogo size="sm" />
             <div className="leading-tight">
               <div className="text-[14px] font-semibold tracking-tight text-white">Danny Gruchmann</div>
               <div className="text-[11px] text-[#7c8699] mono tracking-wider">FULLSTACK DEV</div>

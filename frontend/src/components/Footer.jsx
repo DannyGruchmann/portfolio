@@ -2,6 +2,7 @@ import React from "react";
 import { Github, Mail, ArrowUpRight } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { contactInfo } from "../data/mock";
+import BrandLogo from "./BrandLogo";
 
 const Footer = () => {
   const { t } = useLang();
@@ -14,10 +15,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-12 gap-10 mb-14">
           <div className="md:col-span-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="relative w-9 h-9 rounded-md border border-white/10 bg-gradient-to-br from-[#0b1622] to-[#07080c] overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(124,200,255,0.55),transparent_60%)]" />
-                <div className="absolute inset-0 flex items-center justify-center mono text-[14px] font-semibold text-[#cfe8ff]">DG</div>
-              </div>
+              <BrandLogo size="md" />
               <div className="text-white font-semibold tracking-tight">Danny Gruchmann</div>
             </div>
             <p className="text-[14.5px] text-[#9aa4b6] leading-[1.65] max-w-[380px]">
