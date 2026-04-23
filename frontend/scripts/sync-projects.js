@@ -1,0 +1,170 @@
+const fs = require("fs");
+const path = require("path");
+
+const repoRoot = path.resolve(__dirname, "..", "..");
+const projectsRoot = path.join(repoRoot, "projects");
+const outputFile = path.join(__dirname, "..", "src", "data", "generatedProjects.js");
+const previewOutputDir = path.join(__dirname, "..", "public", "project-previews");
+
+const previewCandidates = [
+  "og-image.png",
+  "og-image.jpg",
+  "og-image.jpeg",
+  "hero-exterior.png",
+  "hero.png",
+  "preview.png",
+  "preview.jpg",
+  "cover.png",
+  "cover.jpg",
+];
+
+const categoryByType = {
+  websites: { de: "Website", en: "Website" },
+  webapps: { de: "Web App", en: "Web App" },
+  shops: { de: "Shop", en: "Shop" },
+  scrollytelling: { de: "Scrollytelling", en: "Scrollytelling" },
+  other: { de: "Digitales Produkt", en: "Digital Product" },
+};
+
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function ensureDir(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+function cleanPreviewDir(dir) {
+  ensureDir(dir);
+
+  for (const entry of fs.readdirSync(dir)) {
+    fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
+  }
+}
+
+function normalizeText(value, fallback) {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  return fallback;
+}
+
+function normalizeLocalizedText(value, fallback) {
+  if (typeof value === "string") return { de: value, en: value };
+
+  return {
+    de: normalizeText(value?.de, fallback.de),
+    en: normalizeText(value?.en, fallback.en),
+  };
+}
+
+function isRunnablePlaceholderUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return false;
+
+  try {
+    const parsed = new URL(value);
+    return parsed.hostname.endsWith(".runable.site");
+  } catch {
+    return false;
+  }
+}
+
+function resolveProjectUrl(portfolio, websiteConfig) {
+  const explicitUrl = normalizeText(portfolio.url, "");
+  if (explicitUrl) return explicitUrl;
+
+  const fallbackUrl = normalizeText(websiteConfig.url, "");
+  if (!fallbackUrl || isRunnablePlaceholderUrl(fallbackUrl)) return "";
+
+  return fallbackUrl;
+}
+
+function toProjectEntry(dirName) {
+  const projectDir = path.join(projectsRoot, dirName);
+  const websiteConfigPath = path.join(projectDir, "website.config.json");
+
+  if (!fs.existsSync(websiteConfigPath)) return null;
+
+  const websiteConfig = readJson(websiteConfigPath);
+  const portfolioPath = path.join(projectDir, "portfolio.json");
+  const portfolio = fs.existsSync(portfolioPath) ? readJson(portfolioPath) : {};
+  if (portfolio.published === false || portfolio.visible === false) return null;
+  const type = normalizeText(portfolio.type, "websites");
+  const categoryFallback = categoryByType[type] || categoryByType.other;
+  const title = normalizeText(portfolio.name, normalizeText(websiteConfig.name, dirName));
+  const year = String(portfolio.year || new Date().getFullYear());
+  const stack = Array.isArray(portfolio.stack) ? portfolio.stack.filter(Boolean) : [];
+  const localizedCategory = normalizeLocalizedText(portfolio.category, categoryFallback);
+  const projectUrl = resolveProjectUrl(portfolio, websiteConfig);
+  const localizedDesc = normalizeLocalizedText(portfolio.desc, {
+    de: normalizeText(websiteConfig.description, `${title} im Portfolio`),
+    en: normalizeText(websiteConfig.description, `${title} in the portfolio`),
+  });
+
+  const publicDir = path.join(projectDir, "public");
+  const requestedPreview = portfolio.image;
+  const previewFileName =
+    typeof requestedPreview === "string" && requestedPreview.trim()
+      ? requestedPreview.trim()
+      : previewCandidates.find((fileName) => fs.existsSync(path.join(publicDir, fileName)));
+
+  let image = "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1400&q=80";
+
+  if (previewFileName && fs.existsSync(path.join(publicDir, previewFileName))) {
+    ensureDir(previewOutputDir);
+    const extension = path.extname(previewFileName) || ".png";
+    const outputName = `${dirName}${extension}`;
+    fs.copyFileSync(path.join(publicDir, previewFileName), path.join(previewOutputDir, outputName));
+    image = `/project-previews/${outputName}`;
+  }
+
+  return {
+    de: {
+      name: title,
+      type,
+      url: projectUrl,
+      category: localizedCategory.de,
+      year,
+      desc: localizedDesc.de,
+      stack,
+      image,
+    },
+    en: {
+      name: title,
+      type,
+      url: projectUrl,
+      category: localizedCategory.en,
+      year,
+      desc: localizedDesc.en,
+      stack,
+      image,
+    },
+  };
+}
+
+function buildRegistry() {
+  if (!fs.existsSync(projectsRoot)) return { de: [], en: [] };
+
+  cleanPreviewDir(previewOutputDir);
+
+  const projects = fs
+    .readdirSync(projectsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => toProjectEntry(entry.name))
+    .filter(Boolean);
+
+  return {
+    de: projects.map((project) => project.de),
+    en: projects.map((project) => project.en),
+  };
+}
+
+const registry = buildRegistry();
+const fileContents = `// Auto-generated by frontend/scripts/sync-projects.js
+export const generatedProjects = ${JSON.stringify(registry, null, 2)};
+`;
+
+ensureDir(path.dirname(outputFile));
+fs.writeFileSync(outputFile, fileContents, "utf8");
+
+console.log(
+  `Synced ${registry.de.length} project${registry.de.length === 1 ? "" : "s"} from ${projectsRoot}`
+);

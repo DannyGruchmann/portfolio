@@ -1,0 +1,17 @@
+{
+  "published": true,
+  "visible": true,
+  "name": "ARC Residences – Premium Architecture",
+  "type": "websites",
+  "url": "https://arc-immo.dannygruchmann.com",
+  "year": "2026",
+  "stack": ["React", "Vite", "Cloudflare Pages"],
+  "category": {
+    "de": "Immobilien · Premium Website",
+    "en": "Real Estate · Premium Website"
+  },
+  "desc": {
+    "de": "Premium-Website fuer ein hochwertiges Immobilienkonzept mit editorialem Aufbau, starker Bildsprache und einer klaren Praesentation von Architektur, Lage und Lebensgefuehl.",
+    "en": "Premium website for a high-end real estate concept with an editorial structure, strong visual language and a clear presentation of architecture, location and lifestyle."
+  }
+}
