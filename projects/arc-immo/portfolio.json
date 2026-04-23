@@ -5,6 +5,7 @@
   "type": "websites",
   "url": "https://arc-immo.dannygruchmann.com",
   "year": "2026",
+  "image": "preview.jpeg",
   "stack": ["React", "Vite", "Cloudflare Pages"],
   "category": {
     "de": "Immobilien · Premium Website",

@@ -13,7 +13,7 @@ export const generatedProjects = {
         "Vite",
         "Cloudflare Pages"
       ],
-      "image": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1400&q=80"
+      "image": "/project-previews/arc-immo.jpeg"
     }
   ],
   "en": [
@@ -29,7 +29,7 @@ export const generatedProjects = {
         "Vite",
         "Cloudflare Pages"
       ],
-      "image": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1400&q=80"
+      "image": "/project-previews/arc-immo.jpeg"
     }
   ]
 };
