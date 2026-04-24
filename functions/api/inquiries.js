@@ -10,6 +10,7 @@ const json = (body, status = 200) =>
   });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[+]?[- 0-9()/]{6,30}$/;
 
 const sanitizeText = (value, maxLength) => {
   const text = typeof value === "string" ? value.trim() : "";
@@ -44,6 +45,25 @@ const sendResendEmail = async (env, payload) => {
   return result;
 };
 
+const sendLeadWebhook = async (env, payload) => {
+  if (!env.LEAD_WEBHOOK_URL) return null;
+
+  const response = await fetch(env.LEAD_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "dglabs-lead-webhook/1.0",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lead webhook failed with status ${response.status}`);
+  }
+
+  return { status: response.status };
+};
+
 export const onRequestOptions = async () => json({ ok: true });
 
 export const onRequestPost = async ({ request, env }) => {
@@ -57,7 +77,11 @@ export const onRequestPost = async ({ request, env }) => {
 
   const name = sanitizeText(payload?.name, 120);
   const email = sanitizeText(payload?.email, 320).toLowerCase();
+  const phone = sanitizeText(payload?.phone, 80);
   const company = sanitizeText(payload?.company, 160);
+  const industry = sanitizeText(payload?.industry, 120);
+  const goal = sanitizeText(payload?.goal, 120);
+  const timeline = sanitizeText(payload?.timeline, 120);
   const budget = sanitizeText(payload?.budget, 40);
   const message = sanitizeText(payload?.message, 4000);
 
@@ -67,6 +91,10 @@ export const onRequestPost = async ({ request, env }) => {
 
   if (!EMAIL_RE.test(email)) {
     return json({ detail: "A valid email is required" }, 422);
+  }
+
+  if (phone && !PHONE_RE.test(phone)) {
+    return json({ detail: "A valid phone number is required" }, 422);
   }
 
   if (message.length < 2) {
@@ -80,14 +108,32 @@ export const onRequestPost = async ({ request, env }) => {
   const recipient = env.CONTACT_TO_EMAIL || "dannygruchmann@proton.me";
   const sender = env.CONTACT_FROM_EMAIL || "kontakt@dannygruchmann.com";
   const createdAt = new Date().toISOString();
-  const subject = `Neue Portfolio-Anfrage von ${name}`;
+  const lead = {
+    source: "dannygruchmann.com",
+    brand: "DGLabs",
+    name,
+    email,
+    phone,
+    company,
+    industry,
+    goal,
+    timeline,
+    budget,
+    message,
+    createdAt,
+  };
+  const subject = `Neue DGLabs-Anfrage von ${name}`;
   const ownerReplyTo = email;
 
   const html = `
-    <h1>Neue Anfrage ueber das Portfolio-Formular</h1>
+    <h1>Neue Anfrage über das DGLabs-Formular</h1>
     <p><strong>Name:</strong> ${escapeHtml(name)}</p>
     <p><strong>E-Mail:</strong> ${escapeHtml(email)}</p>
+    <p><strong>Telefon:</strong> ${escapeHtml(phone || "Nicht angegeben")}</p>
     <p><strong>Firma:</strong> ${escapeHtml(company || "Nicht angegeben")}</p>
+    <p><strong>Branche:</strong> ${escapeHtml(industry || "Nicht angegeben")}</p>
+    <p><strong>Ziel:</strong> ${escapeHtml(goal || "Nicht angegeben")}</p>
+    <p><strong>Startzeitpunkt:</strong> ${escapeHtml(timeline || "Nicht angegeben")}</p>
     <p><strong>Budget:</strong> ${escapeHtml(budget || "Nicht angegeben")}</p>
     <p><strong>Zeitpunkt:</strong> ${escapeHtml(createdAt)}</p>
     <p><strong>Nachricht:</strong></p>
@@ -95,11 +141,15 @@ export const onRequestPost = async ({ request, env }) => {
   `;
 
   const text = [
-    "Neue Anfrage ueber das Portfolio-Formular",
+    "Neue Anfrage über das DGLabs-Formular",
     "",
     `Name: ${name}`,
     `E-Mail: ${email}`,
+    `Telefon: ${phone || "Nicht angegeben"}`,
     `Firma: ${company || "Nicht angegeben"}`,
+    `Branche: ${industry || "Nicht angegeben"}`,
+    `Ziel: ${goal || "Nicht angegeben"}`,
+    `Startzeitpunkt: ${timeline || "Nicht angegeben"}`,
     `Budget: ${budget || "Nicht angegeben"}`,
     `Zeitpunkt: ${createdAt}`,
     "",
@@ -107,15 +157,15 @@ export const onRequestPost = async ({ request, env }) => {
     message,
   ].join("\n");
 
-  const autoReplySubject = "Danke fuer deine Anfrage";
+  const autoReplySubject = "Danke für deine Anfrage";
   const autoReplyHtml = `
     <div style="margin:0;padding:32px 16px;background:#06080d;font-family:Inter,Segoe UI,Arial,sans-serif;color:#e8eef8;">
       <div style="max-width:640px;margin:0 auto;border:1px solid rgba(124,200,255,0.18);border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#11141b 0%,#0a0d13 100%);box-shadow:0 24px 80px rgba(0,0,0,0.35);">
         <div style="padding:28px 32px;border-bottom:1px solid rgba(255,255,255,0.06);background:radial-gradient(circle at top left, rgba(124,200,255,0.18), transparent 42%);">
           <div style="font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#7cc8ff;margin-bottom:14px;">Danny Gruchmann</div>
-          <h1 style="margin:0;font-size:32px;line-height:1.15;color:#ffffff;">Danke fuer deine Anfrage.</h1>
+          <h1 style="margin:0;font-size:32px;line-height:1.15;color:#ffffff;">Danke für deine Anfrage.</h1>
           <p style="margin:14px 0 0;color:#aeb9cc;font-size:16px;line-height:1.7;">
-            Ich habe deine Nachricht erhalten und melde mich in der Regel innerhalb von 24 Stunden mit einer ersten Rueckmeldung.
+            Ich habe deine Nachricht erhalten und melde mich in der Regel innerhalb von 24 Stunden mit einer ersten Rückmeldung.
           </p>
         </div>
         <div style="padding:28px 32px 10px;">
@@ -124,7 +174,11 @@ export const onRequestPost = async ({ request, env }) => {
             <div style="color:#ffffff;font-size:15px;line-height:1.8;">
               <div><strong>Name:</strong> ${escapeHtml(name)}</div>
               <div><strong>E-Mail:</strong> ${escapeHtml(email)}</div>
+              <div><strong>Telefon:</strong> ${escapeHtml(phone || "Nicht angegeben")}</div>
               <div><strong>Firma:</strong> ${escapeHtml(company || "Nicht angegeben")}</div>
+              <div><strong>Branche:</strong> ${escapeHtml(industry || "Nicht angegeben")}</div>
+              <div><strong>Ziel:</strong> ${escapeHtml(goal || "Nicht angegeben")}</div>
+              <div><strong>Startzeitpunkt:</strong> ${escapeHtml(timeline || "Nicht angegeben")}</div>
               <div><strong>Budget:</strong> ${escapeHtml(budget || "Nicht angegeben")}</div>
             </div>
             <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);color:#d8e2f0;font-size:15px;line-height:1.75;">
@@ -134,7 +188,7 @@ export const onRequestPost = async ({ request, env }) => {
         </div>
         <div style="padding:0 32px 28px;">
           <p style="margin:0 0 18px;color:#aeb9cc;font-size:15px;line-height:1.7;">
-            Falls du noch etwas ergaenzen willst, kannst du einfach auf diese E-Mail antworten.
+            Falls du noch etwas ergänzen willst, kannst du einfach auf diese E-Mail antworten.
           </p>
           <a href="mailto:${escapeHtml(sender)}" style="display:inline-block;padding:13px 20px;border-radius:999px;background:linear-gradient(180deg,#7fd7ff 0%,#2ca5f5 100%);color:#06111a;text-decoration:none;font-weight:700;">
             Direkt antworten
@@ -150,26 +204,37 @@ export const onRequestPost = async ({ request, env }) => {
   `;
 
   const autoReplyText = [
-    "Danke fuer deine Anfrage.",
+    "Danke für deine Anfrage.",
     "",
-    "Ich habe deine Nachricht erhalten und melde mich in der Regel innerhalb von 24 Stunden mit einer ersten Rueckmeldung.",
+    "Ich habe deine Nachricht erhalten und melde mich in der Regel innerhalb von 24 Stunden mit einer ersten Rückmeldung.",
     "",
     "Deine Anfrage:",
     `Name: ${name}`,
     `E-Mail: ${email}`,
+    `Telefon: ${phone || "Nicht angegeben"}`,
     `Firma: ${company || "Nicht angegeben"}`,
+    `Branche: ${industry || "Nicht angegeben"}`,
+    `Ziel: ${goal || "Nicht angegeben"}`,
+    `Startzeitpunkt: ${timeline || "Nicht angegeben"}`,
     `Budget: ${budget || "Nicht angegeben"}`,
     "",
     "Nachricht:",
     message,
     "",
-    "Falls du noch etwas ergaenzen willst, kannst du einfach auf diese E-Mail antworten.",
+    "Falls du noch etwas ergänzen willst, kannst du einfach auf diese E-Mail antworten.",
     "",
     "Danny Gruchmann",
     "https://dannygruchmann.com",
   ].join("\n");
 
   try {
+    let webhookResult = null;
+    try {
+      webhookResult = await sendLeadWebhook(env, lead);
+    } catch (webhookError) {
+      console.error("Lead webhook request failed:", webhookError);
+    }
+
     const ownerEmailResult = await sendResendEmail(env, {
       from: `Danny Gruchmann Portfolio <${sender}>`,
       to: [recipient],
@@ -191,12 +256,8 @@ export const onRequestPost = async ({ request, env }) => {
     return json(
       {
         id: ownerEmailResult.id,
-        name,
-        email,
-        company,
-        budget,
-        message,
-        createdAt,
+        ...lead,
+        webhookDelivered: Boolean(webhookResult),
       },
       201
     );

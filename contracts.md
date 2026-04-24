@@ -17,7 +17,11 @@ Create a new contact inquiry.
 {
   "name": "string (required)",
   "email": "string (required, valid email)",
+  "phone": "string (optional, valid phone characters if provided)",
   "company": "string (optional)",
+  "industry": "string (optional)",
+  "goal": "string (optional)",
+  "timeline": "string (optional)",
   "budget": "string (optional)",
   "message": "string (required, min 2 chars)"
 }
@@ -29,7 +33,11 @@ Create a new contact inquiry.
   "id": "uuid",
   "name": "...",
   "email": "...",
+  "phone": "...",
   "company": "...",
+  "industry": "...",
+  "goal": "...",
+  "timeline": "...",
   "budget": "...",
   "message": "...",
   "createdAt": "ISO-8601 timestamp"
@@ -71,6 +79,7 @@ Cloudflare requirements:
 - Add a `send_email` binding named `EMAIL`
 - Set `CONTACT_FROM_EMAIL` to a sender on your domain, for example `kontakt@dannygruchmann.com`
 - Set `CONTACT_TO_EMAIL` to your inbox, for example `dannygruchmann@proton.me`
+- Optional: set `LEAD_WEBHOOK_URL` to forward qualified inquiries into n8n, Zapier, Make, Airtable, HubSpot, or another CRM pipeline
 
 Frontend behavior:
 - If `REACT_APP_BACKEND_URL` is set, the frontend uses that external backend

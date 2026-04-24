@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Github, Mail, ArrowUpRight } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { contactInfo } from "../data/mock";
@@ -16,7 +17,7 @@ const Footer = () => {
           <div className="md:col-span-5">
             <div className="flex items-center gap-2.5 mb-4">
               <BrandLogo size="md" />
-              <div className="text-white font-semibold tracking-tight">Danny Gruchmann</div>
+              <div className="text-white font-semibold tracking-tight">DGLabs by Danny Gruchmann</div>
             </div>
             <p className="text-[14.5px] text-[#9aa4b6] leading-[1.65] max-w-[380px]">
               {t.footer.tagline}
@@ -57,8 +58,8 @@ const Footer = () => {
             © {year} Danny Gruchmann · {t.footer.rights}
           </div>
           <div className="flex gap-5 text-[12.5px] text-[#8591a6]">
-            <a href="#" className="hover:text-white">{t.footer.imprint}</a>
-            <a href="#" className="hover:text-white">{t.footer.privacy}</a>
+            <Link to="/impressum" className="hover:text-white">{t.footer.imprint}</Link>
+            <Link to="/datenschutz" className="hover:text-white">{t.footer.privacy}</Link>
           </div>
         </div>
       </div>

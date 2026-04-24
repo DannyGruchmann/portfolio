@@ -11,11 +11,23 @@ const configuredBackendUrl =
     ? process.env.REACT_APP_BACKEND_URL
     : "";
 const API = configuredBackendUrl ? `${configuredBackendUrl}/api` : "/api";
+const EMAIL_PATTERN = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$";
+const PHONE_PATTERN = "^[+]?[- 0-9()/]{6,30}$";
 
 const Contact = () => {
   const { t } = useLang();
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: "", email: "", company: "", budget: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    industry: "",
+    goal: "",
+    timeline: "",
+    budget: "",
+    message: "",
+  });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +43,17 @@ const Contact = () => {
       });
       setSent(true);
       toast({ title: t.contact.form.sent });
-      setForm({ name: "", email: "", company: "", budget: "", message: "" });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        industry: "",
+        goal: "",
+        timeline: "",
+        budget: "",
+        message: "",
+      });
       setTimeout(() => setSent(false), 3500);
     } catch (err) {
       const detail = err?.response?.data?.detail;
@@ -99,29 +121,46 @@ const Contact = () => {
         >
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={t.contact.form.name} name="name" value={form.name} onChange={handleChange} required />
-            <Field label={t.contact.form.email} name="email" type="email" value={form.email} onChange={handleChange} required />
+            <Field
+              label={t.contact.form.email}
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              pattern={EMAIL_PATTERN}
+              title="Bitte gib eine gültige E-Mail-Adresse ein."
+              required
+            />
           </div>
           <Field label={t.contact.form.company} name="company" value={form.company} onChange={handleChange} />
 
-          <div>
-            <label className="mono text-[11px] tracking-[0.18em] uppercase text-[#7c8699] mb-2 block">{t.contact.form.budget}</label>
-            <div className="flex flex-wrap gap-2">
-              {t.contact.budgets.map((b) => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setForm({ ...form, budget: b })}
-                  className={`px-3.5 py-2 rounded-full text-[13px] border transition-all ${
-                    form.budget === b
-                      ? "bg-[#0d2033] border-[#2e5a85] text-[#c7e5ff]"
-                      : "bg-transparent border-white/10 text-[#8591a6] hover:border-white/25 hover:text-white"
-                  }`}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ChoiceGroup
+            label={t.contact.form.industry}
+            options={t.contact.industries}
+            value={form.industry}
+            onSelect={(industry) => setForm({ ...form, industry })}
+          />
+
+          <ChoiceGroup
+            label={t.contact.form.goal}
+            options={t.contact.goals}
+            value={form.goal}
+            onSelect={(goal) => setForm({ ...form, goal })}
+          />
+
+          <ChoiceGroup
+            label={t.contact.form.timeline}
+            options={t.contact.timelines}
+            value={form.timeline}
+            onSelect={(timeline) => setForm({ ...form, timeline })}
+          />
+
+          <ChoiceGroup
+            label={t.contact.form.budget}
+            options={t.contact.budgets}
+            value={form.budget}
+            onSelect={(budget) => setForm({ ...form, budget })}
+          />
 
           <div>
             <label className="mono text-[11px] tracking-[0.18em] uppercase text-[#7c8699] mb-2 block">{t.contact.form.message}</label>
@@ -135,6 +174,16 @@ const Contact = () => {
               placeholder="..."
             />
           </div>
+
+          <Field
+            label={t.contact.form.phone}
+            name="phone"
+            type="tel"
+            value={form.phone}
+            onChange={handleChange}
+            pattern={PHONE_PATTERN}
+            title="Bitte gib eine gültige Telefonnummer ein oder lasse das Feld leer."
+          />
 
           <div className="pt-2">
             <button
@@ -151,7 +200,7 @@ const Contact = () => {
   );
 };
 
-const Field = ({ label, name, value, onChange, type = "text", required }) => (
+const Field = ({ label, name, value, onChange, type = "text", required, pattern, title }) => (
   <div>
     <label className="mono text-[11px] tracking-[0.18em] uppercase text-[#7c8699] mb-2 block">{label}</label>
     <input
@@ -160,8 +209,32 @@ const Field = ({ label, name, value, onChange, type = "text", required }) => (
       value={value}
       onChange={onChange}
       required={required}
+      pattern={pattern}
+      title={title}
       className="w-full bg-[#0a0f18] border border-white/10 rounded-xl px-4 py-3 text-[14.5px] text-white placeholder:text-[#4a5669] focus:outline-none focus:border-[#2e5a85] focus:ring-2 focus:ring-[#1c6fd0]/25 transition-colors"
     />
+  </div>
+);
+
+const ChoiceGroup = ({ label, options, value, onSelect }) => (
+  <div>
+    <label className="mono text-[11px] tracking-[0.18em] uppercase text-[#7c8699] mb-2 block">{label}</label>
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => onSelect(option)}
+          className={`px-3.5 py-2 rounded-full text-[13px] border transition-all ${
+            value === option
+              ? "bg-[#0d2033] border-[#2e5a85] text-[#c7e5ff]"
+              : "bg-transparent border-white/10 text-[#8591a6] hover:border-white/25 hover:text-white"
+          }`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
   </div>
 );
 

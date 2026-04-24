@@ -5,6 +5,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
+import Audience from "./components/Audience";
 import Services from "./components/Services";
 import TechStack from "./components/TechStack";
 import Projects from "./components/Projects";
@@ -13,6 +14,7 @@ import Process from "./components/Process";
 import ContactCTA from "./components/ContactCTA";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import { ImprintPage, PrivacyPage } from "./components/LegalPage";
 import ScrollProgress from "./components/ScrollProgress";
 import ScrollToTop from "./components/ScrollToTop";
 import { Toaster } from "./components/ui/toaster";
@@ -25,6 +27,7 @@ const Home = () => {
       <main>
         <Hero />
         <About />
+        <Audience />
         <Services />
         <TechStack />
         <Projects />
@@ -46,6 +49,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/impressum" element={<ImprintPage />} />
+          <Route path="/datenschutz" element={<PrivacyPage />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

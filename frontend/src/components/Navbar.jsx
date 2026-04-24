@@ -52,8 +52,8 @@ const Navbar = () => {
           >
             <BrandLogo size="sm" />
             <div className="leading-tight">
-              <div className="text-[14px] font-semibold tracking-tight text-white">Danny Gruchmann</div>
-              <div className="text-[11px] text-[#7c8699] mono tracking-wider">FULLSTACK DEV</div>
+              <div className="text-[14px] font-semibold tracking-tight text-white">DGLabs</div>
+              <div className="text-[11px] text-[#7c8699] mono tracking-wider">WEB & AUTOMATION</div>
             </div>
           </a>
 

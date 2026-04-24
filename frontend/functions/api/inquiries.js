@@ -10,6 +10,7 @@ const json = (body, status = 200) =>
   });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[+]?[- 0-9()/]{6,30}$/;
 
 const sanitizeText = (value, maxLength) => {
   const text = typeof value === "string" ? value.trim() : "";
@@ -24,6 +25,25 @@ const escapeHtml = (value) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
+const sendLeadWebhook = async (env, payload) => {
+  if (!env.LEAD_WEBHOOK_URL) return null;
+
+  const response = await fetch(env.LEAD_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "dglabs-lead-webhook/1.0",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lead webhook failed with status ${response.status}`);
+  }
+
+  return { status: response.status };
+};
+
 export const onRequestOptions = async () => json({ ok: true });
 
 export const onRequestPost = async ({ request, env }) => {
@@ -37,7 +57,11 @@ export const onRequestPost = async ({ request, env }) => {
 
   const name = sanitizeText(payload?.name, 120);
   const email = sanitizeText(payload?.email, 320).toLowerCase();
+  const phone = sanitizeText(payload?.phone, 80);
   const company = sanitizeText(payload?.company, 160);
+  const industry = sanitizeText(payload?.industry, 120);
+  const goal = sanitizeText(payload?.goal, 120);
+  const timeline = sanitizeText(payload?.timeline, 120);
   const budget = sanitizeText(payload?.budget, 40);
   const message = sanitizeText(payload?.message, 4000);
 
@@ -47,6 +71,10 @@ export const onRequestPost = async ({ request, env }) => {
 
   if (!EMAIL_RE.test(email)) {
     return json({ detail: "A valid email is required" }, 422);
+  }
+
+  if (phone && !PHONE_RE.test(phone)) {
+    return json({ detail: "A valid phone number is required" }, 422);
   }
 
   if (message.length < 2) {
@@ -60,13 +88,31 @@ export const onRequestPost = async ({ request, env }) => {
   const recipient = env.CONTACT_TO_EMAIL || "dannygruchmann@proton.me";
   const sender = env.CONTACT_FROM_EMAIL || "kontakt@dannygruchmann.com";
   const createdAt = new Date().toISOString();
-  const subject = `Neue Portfolio-Anfrage von ${name}`;
+  const lead = {
+    source: "dannygruchmann.com",
+    brand: "DGLabs",
+    name,
+    email,
+    phone,
+    company,
+    industry,
+    goal,
+    timeline,
+    budget,
+    message,
+    createdAt,
+  };
+  const subject = `Neue DGLabs-Anfrage von ${name}`;
 
   const html = `
-    <h1>Neue Anfrage ueber das Portfolio-Formular</h1>
+    <h1>Neue Anfrage über das DGLabs-Formular</h1>
     <p><strong>Name:</strong> ${escapeHtml(name)}</p>
     <p><strong>E-Mail:</strong> ${escapeHtml(email)}</p>
+    <p><strong>Telefon:</strong> ${escapeHtml(phone || "Nicht angegeben")}</p>
     <p><strong>Firma:</strong> ${escapeHtml(company || "Nicht angegeben")}</p>
+    <p><strong>Branche:</strong> ${escapeHtml(industry || "Nicht angegeben")}</p>
+    <p><strong>Ziel:</strong> ${escapeHtml(goal || "Nicht angegeben")}</p>
+    <p><strong>Startzeitpunkt:</strong> ${escapeHtml(timeline || "Nicht angegeben")}</p>
     <p><strong>Budget:</strong> ${escapeHtml(budget || "Nicht angegeben")}</p>
     <p><strong>Zeitpunkt:</strong> ${escapeHtml(createdAt)}</p>
     <p><strong>Nachricht:</strong></p>
@@ -74,11 +120,15 @@ export const onRequestPost = async ({ request, env }) => {
   `;
 
   const text = [
-    "Neue Anfrage ueber das Portfolio-Formular",
+    "Neue Anfrage über das DGLabs-Formular",
     "",
     `Name: ${name}`,
     `E-Mail: ${email}`,
+    `Telefon: ${phone || "Nicht angegeben"}`,
     `Firma: ${company || "Nicht angegeben"}`,
+    `Branche: ${industry || "Nicht angegeben"}`,
+    `Ziel: ${goal || "Nicht angegeben"}`,
+    `Startzeitpunkt: ${timeline || "Nicht angegeben"}`,
     `Budget: ${budget || "Nicht angegeben"}`,
     `Zeitpunkt: ${createdAt}`,
     "",
@@ -87,6 +137,13 @@ export const onRequestPost = async ({ request, env }) => {
   ].join("\n");
 
   try {
+    let webhookResult = null;
+    try {
+      webhookResult = await sendLeadWebhook(env, lead);
+    } catch (webhookError) {
+      console.error("Lead webhook request failed:", webhookError);
+    }
+
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -120,12 +177,8 @@ export const onRequestPost = async ({ request, env }) => {
     return json(
       {
         id: result.id,
-        name,
-        email,
-        company,
-        budget,
-        message,
-        createdAt,
+        ...lead,
+        webhookDelivered: Boolean(webhookResult),
       },
       201
     );

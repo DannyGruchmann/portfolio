@@ -7,13 +7,27 @@ export const generatedProjects = {
       "url": "https://arc-immo.dannygruchmann.com",
       "category": "Immobilien · Premium Website",
       "year": "2026",
-      "desc": "Premium-Website fuer ein hochwertiges Immobilienkonzept mit editorialem Aufbau, starker Bildsprache und einer klaren Praesentation von Architektur, Lage und Lebensgefuehl.",
+      "desc": "Premium-Website für ein hochwertiges Immobilienkonzept mit editorialem Aufbau, starker Bildsprache und einer klaren Präsentation von Architektur, Lage und Lebensgefühl.",
       "stack": [
         "React",
         "Vite",
         "Cloudflare Pages"
       ],
       "image": "/project-previews/arc-immo.jpeg"
+    },
+    {
+      "name": "MeisterFlow – Handwerk Automation Demo",
+      "type": "webapps",
+      "url": "",
+      "category": "Handwerk · Demo Case",
+      "year": "2026",
+      "desc": "Konzipierter Demo Case für einen Handwerksbetrieb: klare Angebotsseite, qualifizierendes Anfrageformular, automatische CRM-Übergabe und Follow-up-Prozess für neue Leads.",
+      "stack": [
+        "React",
+        "CRM Webhook",
+        "Automation Flow"
+      ],
+      "image": "/project-previews/meisterflow-demo.svg"
     }
   ],
   "en": [
@@ -30,6 +44,20 @@ export const generatedProjects = {
         "Cloudflare Pages"
       ],
       "image": "/project-previews/arc-immo.jpeg"
+    },
+    {
+      "name": "MeisterFlow – Handwerk Automation Demo",
+      "type": "webapps",
+      "url": "",
+      "category": "Trades · Demo Case",
+      "year": "2026",
+      "desc": "Concept demo case for a trade business: clear offer page, qualifying inquiry form, automatic CRM handoff and follow-up process for new leads.",
+      "stack": [
+        "React",
+        "CRM Webhook",
+        "Automation Flow"
+      ],
+      "image": "/project-previews/meisterflow-demo.svg"
     }
   ]
 };

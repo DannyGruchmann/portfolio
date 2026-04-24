@@ -1,0 +1,18 @@
+{
+  "published": true,
+  "visible": true,
+  "name": "MeisterFlow – Handwerk Automation Demo",
+  "type": "webapps",
+  "url": "",
+  "year": "2026",
+  "image": "preview.svg",
+  "stack": ["React", "CRM Webhook", "Automation Flow"],
+  "category": {
+    "de": "Handwerk · Demo Case",
+    "en": "Trades · Demo Case"
+  },
+  "desc": {
+    "de": "Konzipierter Demo Case für einen Handwerksbetrieb: klare Angebotsseite, qualifizierendes Anfrageformular, automatische CRM-Übergabe und Follow-up-Prozess für neue Leads.",
+    "en": "Concept demo case for a trade business: clear offer page, qualifying inquiry form, automatic CRM handoff and follow-up process for new leads."
+  }
+}
