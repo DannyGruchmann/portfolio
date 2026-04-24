@@ -18,6 +18,7 @@ const Navbar = () => {
   const links = [
     { href: "#about", label: t.nav.about },
     { href: "#services", label: t.nav.services },
+    { href: "#automation", label: t.nav.automation },
     { href: "#stack", label: t.nav.stack },
     { href: "#work", label: t.nav.work },
     { href: "#process", label: t.nav.process },

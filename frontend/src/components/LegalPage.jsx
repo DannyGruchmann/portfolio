@@ -13,6 +13,11 @@ const legalData = {
   vatId: "[Falls vorhanden: USt-IdNr. / sonst entfernen]",
   taxNumber: "[Steuernummer wird nicht öffentlich benötigt und sollte normalerweise nicht veröffentlicht werden]",
   supervisoryAuthority: "[Falls für deine Tätigkeit erforderlich: zuständige Aufsichtsbehörde]",
+  cloudflare: "Cloudflare, Inc.",
+  resend: "Resend, Inc.",
+  googleFonts: "Google Ireland Limited",
+  spaceship: "Spaceship, Inc.",
+  automation: "n8n",
 };
 
 const Section = ({ title, children }) => (
@@ -80,7 +85,7 @@ export const ImprintPage = () => (
       <p>{legalData.vatId}</p>
     </Section>
 
-    <Section title="Aufsichtsbehoerde">
+    <Section title="Aufsichtsbehörde">
       <p>{legalData.supervisoryAuthority}</p>
     </Section>
 
@@ -117,10 +122,11 @@ export const PrivacyPage = () => (
 
     <Section title="2. Hosting und technische Bereitstellung">
       <p>
-        Diese Website wird als statische Webanwendung bereitgestellt. Beim Aufruf der Website werden technisch
-        notwendige Zugriffsdaten verarbeitet, etwa IP-Adresse, Datum und Uhrzeit des Abrufs, Browsertyp,
-        Betriebssystem und angefragte Dateien. Diese Verarbeitung ist erforderlich, um die Website sicher und
-        stabil auszuliefern.
+        Diese Website wird als statische Webanwendung bereitgestellt. Nach deinen Angaben werden für Domain,
+        Hosting oder technische Bereitstellung unter anderem {legalData.cloudflare} und {legalData.spaceship}
+        eingesetzt. Beim Aufruf der Website werden technisch notwendige Zugriffsdaten verarbeitet, etwa
+        IP-Adresse, Datum und Uhrzeit des Abrufs, Browsertyp, Betriebssystem und angefragte Dateien. Diese
+        Verarbeitung ist erforderlich, um die Website sicher und stabil auszuliefern.
       </p>
       <p>
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse liegt in der sicheren,
@@ -144,13 +150,14 @@ export const PrivacyPage = () => (
 
     <Section title="4. E-Mail-Versand und CRM/Webhook">
       <p>
-        Formularanfragen können über einen E-Mail-Dienst an mich weitergeleitet werden. Zusätzlich ist eine
-        Webhook-Schnittstelle vorbereitet, über die Anfrageinformationen an ein CRM- oder Automationstool
-        übergeben werden können, sobald ein entsprechendes System aktiv verbunden ist.
+        Formularanfragen werden über den E-Mail-Dienst {legalData.resend} an mich weitergeleitet. Zusätzlich ist
+        eine Webhook-Schnittstelle für {legalData.automation} vorbereitet, über die Anfrageinformationen an einen
+        Automationsworkflow oder eine CRM-Pipeline übergeben werden können, sobald ein entsprechender Workflow
+        aktiv verbunden ist.
       </p>
       <p>
-        Vor Live-Schaltung muss hier konkret ergänzt werden, welche Anbieter tatsächlich eingesetzt werden,
-        zum Beispiel Resend, n8n, Zapier, Make, Airtable, HubSpot oder ein anderes CRM.
+        Wenn n8n später auf einem eigenen Server betrieben wird, muss hier noch der konkrete Serverstandort und
+        Hosting-Anbieter ergänzt werden.
       </p>
     </Section>
 
@@ -170,9 +177,9 @@ export const PrivacyPage = () => (
 
     <Section title="7. Schriftarten und externe Ressourcen">
       <p>
-        Die Website kann externe Schriftarten von Google Fonts laden. Dabei kann deine IP-Adresse an Google
-        übermittelt werden. Falls die Website später vollständig ohne externe Schriftquellen betrieben wird,
-        sollte dieser Abschnitt entsprechend entfernt oder angepasst werden.
+        Diese Website lädt Schriftarten über Google Fonts ({legalData.googleFonts}). Beim Laden der Schriftarten
+        kann deine IP-Adresse an Google übermittelt werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das
+        berechtigte Interesse liegt in einer konsistenten und performanten Darstellung der Website.
       </p>
     </Section>
 

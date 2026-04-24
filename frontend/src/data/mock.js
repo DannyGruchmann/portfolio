@@ -41,6 +41,7 @@ export const translations = {
     nav: {
       about: "Über mich",
       services: "Leistungen",
+      automation: "Automation",
       stack: "Tech Stack",
       work: "Projekte",
       process: "Prozess",
@@ -77,9 +78,9 @@ export const translations = {
       sub: "DGLabs passt besonders, wenn deine Website zwar existiert, aber zu wenig qualifizierte Anfragen erzeugt oder dein Team nach jeder Anfrage wieder alles per Hand sortieren muss.",
       groups: ["Handwerksbetriebe", "Lokale Dienstleister", "Kleine Unternehmen", "Agenturen mit Delivery-Bedarf"],
       problems: [
-        "Website erklaert das Angebot nicht klar genug",
+        "Website erklärt das Angebot nicht klar genug",
         "Anfragen kommen unvollständig oder unqualifiziert rein",
-        "Follow-ups passieren zu spaet oder gar nicht",
+        "Follow-ups passieren zu spät oder gar nicht",
         "Leads landen in E-Mails statt in einer Pipeline",
         "Wiederkehrende Aufgaben kosten jeden Tag Zeit",
       ],
@@ -125,6 +126,29 @@ export const translations = {
           desc: "Kurze Analyse deiner aktuellen Website, Formulare und manuellen Abläufe mit konkreten Quick Wins.",
           tags: ["Review", "Roadmap", "Prioritäten"],
         },
+      ],
+    },
+    automation: {
+      eyebrow: "Automation Blueprint",
+      title: "So wird aus einer Anfrage ein sauberer Prozess.",
+      sub: "Eine Automation muss der Kunde nicht technisch verstehen. Wichtig ist, dass sichtbar wird, was vorher manuell war und was nach dem System automatisch passiert.",
+      problemTitle: "Typisches Problem",
+      problem:
+        "Eine Anfrage kommt per Formular oder E-Mail rein, wird manuell gelesen, weitergeleitet, beantwortet und irgendwann nachverfolgt. Genau dort gehen Zeit, Überblick und potenzielle Aufträge verloren.",
+      resultTitle: "Was das System übernimmt",
+      result:
+        "Neue Leads werden strukturiert erfasst, sofort bestätigt, intern verteilt und in n8n für Follow-ups oder CRM-Schritte vorbereitet.",
+      flow: [
+        { icon: "MessageSquareCode", title: "Anfrage", text: "Website-Formular sammelt die wichtigsten Daten." },
+        { icon: "ShieldCheck", title: "Qualifizierung", text: "Branche, Ziel, Budget und Zeitraum werden direkt sortierbar." },
+        { icon: "Database", title: "Pipeline", text: "Der Lead landet in deiner Liste, deinem CRM oder einem n8n Workflow." },
+        { icon: "Zap", title: "Antwort", text: "Kunde bekommt automatisch eine Eingangsbestätigung." },
+        { icon: "Workflow", title: "Follow-up", text: "Erinnerungen, Aufgaben oder weitere E-Mails starten ohne manuelles Nachhalten." },
+      ],
+      stats: [
+        { value: "0", label: "vergessene Erstreaktionen" },
+        { value: "1", label: "zentrale Lead-Quelle" },
+        { value: "n8n", label: "flexibel erweiterbar" },
       ],
     },
     stack: {
@@ -326,6 +350,7 @@ export const translations = {
     nav: {
       about: "About",
       services: "Services",
+      automation: "Automation",
       stack: "Stack",
       work: "Work",
       process: "Process",
@@ -410,6 +435,29 @@ export const translations = {
           desc: "A short review of your current website, forms and manual workflows with concrete quick wins.",
           tags: ["Review", "Roadmap", "Priorities"],
         },
+      ],
+    },
+    automation: {
+      eyebrow: "Automation Blueprint",
+      title: "How an inquiry becomes a structured process.",
+      sub: "A client does not need to understand the technical workflow. What matters is showing what used to be manual and what happens automatically after the system is in place.",
+      problemTitle: "Typical problem",
+      problem:
+        "An inquiry arrives by form or email, gets read manually, forwarded, answered and eventually followed up. That is where time, overview and potential deals get lost.",
+      resultTitle: "What the system handles",
+      result:
+        "New leads are captured structurally, confirmed instantly, routed internally and prepared in n8n for follow-ups or CRM steps.",
+      flow: [
+        { icon: "MessageSquareCode", title: "Inquiry", text: "Website form collects the important lead data." },
+        { icon: "ShieldCheck", title: "Qualification", text: "Industry, goal, budget and timeline become sortable immediately." },
+        { icon: "Database", title: "Pipeline", text: "The lead lands in your list, CRM or n8n workflow." },
+        { icon: "Zap", title: "Reply", text: "The client receives an automatic confirmation." },
+        { icon: "Workflow", title: "Follow-up", text: "Reminders, tasks or emails start without manual chasing." },
+      ],
+      stats: [
+        { value: "0", label: "missed first replies" },
+        { value: "1", label: "central lead source" },
+        { value: "n8n", label: "flexibly extendable" },
       ],
     },
     stack: {

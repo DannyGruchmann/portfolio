@@ -7,6 +7,7 @@ import Hero from "./components/Hero";
 import About from "./components/About";
 import Audience from "./components/Audience";
 import Services from "./components/Services";
+import AutomationBlueprint from "./components/AutomationBlueprint";
 import TechStack from "./components/TechStack";
 import Projects from "./components/Projects";
 import WhyMe from "./components/WhyMe";
@@ -29,6 +30,7 @@ const Home = () => {
         <About />
         <Audience />
         <Services />
+        <AutomationBlueprint />
         <TechStack />
         <Projects />
         <WhyMe />
