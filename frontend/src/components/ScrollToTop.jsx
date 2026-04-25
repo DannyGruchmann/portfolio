@@ -30,7 +30,7 @@ const ScrollToTop = () => {
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={scrollTop}
           aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 z-50 group"
+          className="fixed bottom-[84px] right-6 z-50 group"
         >
           <div className="relative w-[60px] h-[60px] flex items-center justify-center">
             {/* Backdrop / glass button */}

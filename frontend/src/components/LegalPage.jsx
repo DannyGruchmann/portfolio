@@ -8,15 +8,16 @@ const legalData = {
   brand: "DGLabs",
   email: "kontakt@dannygruchmann.com",
   website: "dannygruchmann.com",
-  address: "[Bitte ladungsfähige Anschrift eintragen]",
-  phone: "[Bitte Telefonnummer eintragen oder bestätigen, dass keine Telefonnummer veröffentlicht werden soll]",
-  vatId: "[Falls vorhanden: USt-IdNr. / sonst entfernen]",
-  taxNumber: "[Steuernummer wird nicht öffentlich benötigt und sollte normalerweise nicht veröffentlicht werden]",
-  supervisoryAuthority: "[Falls für deine Tätigkeit erforderlich: zuständige Aufsichtsbehörde]",
+  address: "[Bitte ladungsfähige Geschäfts- oder Impressumsadresse eintragen]",
+  legalForm: "Einzelunternehmen / Kleingewerbe in Anmeldung",
+  vatId: "Keine Umsatzsteuer-Identifikationsnummer vorhanden.",
+  taxNumber: "Eine Steuernummer wird im Impressum nicht veröffentlicht.",
+  supervisoryAuthority: "Für die angebotenen Web- und Automationsleistungen ist keine besondere Aufsichtsbehörde angegeben.",
   cloudflare: "Cloudflare, Inc.",
   resend: "Resend, Inc.",
   googleFonts: "Google Ireland Limited",
-  spaceship: "Spaceship, Inc.",
+  spaceship: "Spaceship, Inc. (Domain-Registrar)",
+  hostinger: "Hostinger International Ltd.",
   automation: "n8n",
 };
 
@@ -50,8 +51,8 @@ const LegalShell = ({ title, eyebrow, children }) => (
             {title}
           </h1>
           <p className="mt-6 max-w-[680px] text-[16px] leading-[1.7] text-[#a8b2c3]">
-            Stand: April 2026. Diese Seite ist technisch vorbereitet. Die markierten Angaben müssen vor
-            Veröffentlichung mit deinen echten Daten ersetzt werden.
+            Stand: April 2026. Die Anschrift ist noch ein offener Pflichtpunkt und muss vor Veröffentlichung
+            durch eine echte ladungsfähige Adresse ersetzt werden.
           </p>
         </div>
 
@@ -69,6 +70,8 @@ export const ImprintPage = () => (
         <br />
         {legalData.brand}
         <br />
+        {legalData.legalForm}
+        <br />
         {legalData.address}
       </p>
     </Section>
@@ -77,7 +80,7 @@ export const ImprintPage = () => (
       <p>
         E-Mail: <a href={`mailto:${legalData.email}`}>{legalData.email}</a>
         <br />
-        Telefon: {legalData.phone}
+        Kontaktformular: <a href="/#contact">{legalData.website}/#contact</a>
       </p>
     </Section>
 
@@ -112,7 +115,7 @@ export const PrivacyPage = () => (
       <p>
         Verantwortlich für die Datenverarbeitung auf dieser Website ist:
         <br />
-        {legalData.name}, {legalData.brand}
+        {legalData.name}, {legalData.brand}, {legalData.legalForm}
         <br />
         {legalData.address}
         <br />
@@ -122,11 +125,11 @@ export const PrivacyPage = () => (
 
     <Section title="2. Hosting und technische Bereitstellung">
       <p>
-        Diese Website wird als statische Webanwendung bereitgestellt. Nach deinen Angaben werden für Domain,
-        Hosting oder technische Bereitstellung unter anderem {legalData.cloudflare} und {legalData.spaceship}
-        eingesetzt. Beim Aufruf der Website werden technisch notwendige Zugriffsdaten verarbeitet, etwa
-        IP-Adresse, Datum und Uhrzeit des Abrufs, Browsertyp, Betriebssystem und angefragte Dateien. Diese
-        Verarbeitung ist erforderlich, um die Website sicher und stabil auszuliefern.
+        Diese Website wird als statische Webanwendung bereitgestellt. Die Domain wird über {legalData.spaceship}
+        verwaltet und technisch über {legalData.cloudflare} ausgeliefert beziehungsweise abgesichert. Beim Aufruf
+        der Website werden technisch notwendige Zugriffsdaten verarbeitet, etwa IP-Adresse, Datum und Uhrzeit des
+        Abrufs, Browsertyp, Betriebssystem und angefragte Dateien. Diese Verarbeitung ist erforderlich, um die
+        Website sicher und stabil auszuliefern.
       </p>
       <p>
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse liegt in der sicheren,
@@ -142,7 +145,7 @@ export const PrivacyPage = () => (
         vorzubereiten.
       </p>
       <p>
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Anfrage auf vorvertragliche Massnahmen
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Anfrage auf vorvertragliche Maßnahmen
         gerichtet ist, sowie Art. 6 Abs. 1 lit. f DSGVO für die strukturierte Bearbeitung eingehender
         Anfragen.
       </p>
@@ -151,13 +154,13 @@ export const PrivacyPage = () => (
     <Section title="4. E-Mail-Versand und CRM/Webhook">
       <p>
         Formularanfragen werden über den E-Mail-Dienst {legalData.resend} an mich weitergeleitet. Zusätzlich ist
-        eine Webhook-Schnittstelle für {legalData.automation} vorbereitet, über die Anfrageinformationen an einen
-        Automationsworkflow oder eine CRM-Pipeline übergeben werden können, sobald ein entsprechender Workflow
-        aktiv verbunden ist.
+        eine Webhook-Schnittstelle für {legalData.automation} vorbereitet. Nach deinen Angaben soll n8n cloudbasiert
+        über {legalData.hostinger} betrieben werden. Sobald ein entsprechender Workflow aktiv verbunden ist, können
+        Anfrageinformationen an einen Automationsworkflow oder eine CRM-Pipeline übergeben werden.
       </p>
       <p>
-        Wenn n8n später auf einem eigenen Server betrieben wird, muss hier noch der konkrete Serverstandort und
-        Hosting-Anbieter ergänzt werden.
+        Wenn sich Anbieter, Serverstandort oder Betriebsmodell von n8n ändern, muss dieser Abschnitt entsprechend
+        aktualisiert werden.
       </p>
     </Section>
 
